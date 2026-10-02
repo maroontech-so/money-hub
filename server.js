@@ -511,17 +511,42 @@ app.post('/api/payhero/callback', async (req, res) => {
   const startedAt = Date.now();
 
   try {
-    console.log('[PayHero Callback] Received:', JSON.stringify(req.body));
+    console.log('[PayHero Callback] Raw body:', JSON.stringify(req.body));
 
     const payload = req.body || {};
-    const reference = payload.external_reference || payload.reference || payload.user_reference;
-    const statusRaw = (payload.status || payload.Status || payload.ResultCode || '').toString().toUpperCase();
-    const mpesaCode = payload.mpesa_code || payload.MpesaReceiptNumber || payload.MpesaCode || null;
+    
+    // PayHero SPS sends data inside a "response" object
+    const inner = payload.response || payload;
+    
+    // Extract reference — PayHero sends User_Reference
+    const reference = 
+      inner.User_Reference ||
+      inner.user_reference ||
+      payload.external_reference ||
+      payload.reference;
+    
+    // Extract status — look inside response first
+    const statusRaw = (
+      inner.Status || 
+      inner.status || 
+      payload.status || 
+      payload.ResultCode || 
+      ''
+    ).toString().toUpperCase();
+    
+    // Extract M-Pesa receipt code
+    const mpesaCode = 
+      inner.MPESA_Reference || 
+      inner.mpesa_code || 
+      payload.MpesaReceiptNumber || 
+      null;
 
     if (!reference) {
-      console.error('[PayHero Callback] Missing reference');
+      console.error('[PayHero Callback] Missing reference. Payload:', JSON.stringify(payload));
       return res.status(400).json({ error: 'Missing reference' });
     }
+
+    console.log('[PayHero Callback] Parsed:', { reference, statusRaw, mpesaCode });
 
     const payRef = db.collection('payments').doc(reference);
     const paySnap = await payRef.get();
@@ -533,17 +558,20 @@ app.post('/api/payhero/callback', async (req, res) => {
 
     const payment = paySnap.data();
 
+    // Idempotency — don't process duplicates
     if (payment.status === 'SUCCESS' || payment.status === 'FAILED') {
       console.log('[PayHero Callback] Duplicate — already:', payment.status);
       return res.status(200).json({ received: true, duplicate: true });
     }
 
+    // Determine final status
     const successCodes = ['SUCCESS', 'SUCCESSFUL', 'COMPLETED', '0', '200'];
     const failureCodes = ['FAILED', 'FAILURE', 'CANCELLED', 'TIMEOUT', '1037', '1032'];
     const isSuccess = successCodes.includes(statusRaw);
     const isFailure = failureCodes.includes(statusRaw);
 
     const finalStatus = isSuccess ? 'SUCCESS' : (isFailure ? 'FAILED' : 'PENDING');
+    
     const updateData = {
       status: finalStatus,
       mpesaCode,
@@ -556,6 +584,7 @@ app.post('/api/payhero/callback', async (req, res) => {
 
     await payRef.update(updateData);
 
+    // On successful activation, flip user to ACTIVE
     if (finalStatus === 'SUCCESS' && payment.type === 'ACTIVATION') {
       const userRef = db.collection('users').doc(payment.uid);
       await userRef.update({ status: 'ACTIVE' });
@@ -566,11 +595,11 @@ app.post('/api/payhero/callback', async (req, res) => {
         status: 'COMPLETED',
         date: admin.firestore.FieldValue.serverTimestamp(),
       });
-      console.log(`[PayHero Callback] Activated user ${payment.uid} (ref: ${reference})`);
+      console.log(`[PayHero Callback] ✓ Activated user ${payment.uid} (ref: ${reference})`);
     }
 
     if (finalStatus === 'FAILED') {
-      console.log(`[PayHero Callback] Payment failed: ${reference} (status: ${statusRaw})`);
+      console.log(`[PayHero Callback] ✗ Payment failed: ${reference} (status: ${statusRaw})`);
     }
 
     res.status(200).json({
