@@ -6,9 +6,6 @@
 <title>EarnWave — Premium Rewards Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- ============================================================
-     FIREBASE SDK (add inside <head>)
-============================================================ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import {
@@ -21,30 +18,33 @@
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
   // ============================================================
-  // FIREBASE CONFIG — replace with your project's config
+  // REPLACE WITH YOUR FIREBASE WEB CONFIG
   // Firebase Console → Project Settings → Your apps → Web
   // ============================================================
   const firebaseConfig = {
-     apiKey: "AIzaSyCI3P7jPtGuQMzUAc57XddCLl1VfegfwGA",
-  authDomain: "moneywave-2f651.firebaseapp.com",
-  databaseURL: "https://moneywave-2f651-default-rtdb.firebaseio.com",
-  projectId: "moneywave-2f651",
-  storageBucket: "moneywave-2f651.firebasestorage.app",
-  messagingSenderId: "1056208942079",
-  appId: "1:1056208942079:web:3ba32a59817b1a3f55edca",
-  measurementId: "G-LVEZD927PE"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "moneywave-2f651.firebaseapp.com",
+    projectId: "moneywave-2f651",
+    storageBucket: "moneywave-2f651.appspot.com",
+    messagingSenderId: "000000000000",
+    appId: "1:000000000000:web:abcdef123456"
   };
 
   const fbApp = initializeApp(firebaseConfig);
   const fbAuth = getAuth(fbApp);
 
   window.fbAuth = fbAuth;
-  window.fbAuthFns = { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile };
+  window.fbAuthFns = {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut,
+    updateProfile
+  };
   window.dispatchEvent(new Event('firebase-ready'));
 </script>
 
 <style>
-/* ... (your existing CSS unchanged — paste from your file) ... */
 :root {
     --bg-dark: #f4f7fb;
     --bg-surface: #ffffff;
@@ -65,14 +65,26 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: var(--font-main); background-color: var(--bg-dark); color: var(--text-main); line-height: 1.5; overflow-x: hidden; }
 .hidden { display: none !important; }
-.flex { display: flex; } .flex-col { flex-direction: column; }
-.items-center { align-items: center; } .justify-between { justify-content: space-between; }
-.justify-center { justify-content: center; } .gap-2 { gap: 0.5rem; } .gap-4 { gap: 1rem; }
-.mt-2 { margin-top: 0.5rem; } .mt-4 { margin-top: 1rem; } .mb-2 { margin-bottom: 0.5rem; } .mb-4 { margin-bottom: 1rem; }
-.text-center { text-align: center; } .text-muted { color: var(--text-muted); font-size: 0.875rem; }
-.text-success { color: var(--success-accent); } .text-danger { color: var(--danger-accent); }
-.font-bold { font-weight: 700; } .font-semibold { font-weight: 600; }
-h1, h2, h3 { color: var(--text-main); margin-bottom: 0.5rem; } h1 { font-size: 1.5rem; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); font-size: 0.875rem; }
+.text-success { color: var(--success-accent); }
+.text-danger { color: var(--danger-accent); }
+.text-warning { color: var(--warning-accent); }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+h1, h2, h3 { color: var(--text-main); margin-bottom: 0.5rem; }
+h1 { font-size: 1.5rem; }
 button { font-family: var(--font-main); border: none; cursor: pointer; border-radius: 8px; font-weight: 600; transition: var(--transition); padding: 0.75rem 1rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.95rem; gap: 0.4rem; }
 button:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-primary { background: linear-gradient(135deg, var(--primary-accent), #0052cc); color: #ffffff; }
@@ -109,9 +121,20 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
 .view-section { display: none; animation: fadeIn 0.25s ease; }
 .view-section.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 1023px) { .sidebar { transform: translateX(-100%); box-shadow: 4px 0 24px rgba(0,0,0,0.08); } .sidebar.open { transform: translateX(0); } .main-column { margin-left: 0; } .hamburger { display: flex; } .header { padding-left: 4rem; } }
-@media (min-width: 1024px) { .sidebar { transform: translateX(0); } .hamburger { display: none; } }
-@media (min-width: 1440px) { .content-area { padding: 1.75rem 2.5rem; max-width: 1300px; margin: 0 auto; width: 100%; } }
+@media (max-width: 1023px) {
+    .sidebar { transform: translateX(-100%); box-shadow: 4px 0 24px rgba(0,0,0,0.08); }
+    .sidebar.open { transform: translateX(0); }
+    .main-column { margin-left: 0; }
+    .hamburger { display: flex; }
+    .header { padding-left: 4rem; }
+}
+@media (min-width: 1024px) {
+    .sidebar { transform: translateX(0); }
+    .hamburger { display: none; }
+}
+@media (min-width: 1440px) {
+    .content-area { padding: 1.75rem 2.5rem; max-width: 1300px; margin: 0 auto; width: 100%; }
+}
 .wallet-card { background: #ffffff; border-left: 4px solid var(--primary-accent); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 .balance-amount { font-size: 2.25rem; font-weight: 700; margin: 0.5rem 0; letter-spacing: -1px; }
 .task-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
@@ -133,7 +156,9 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
 .tx-item:last-child { border-bottom: none; }
 #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
 .toast { background: #ffffff; border-left: 4px solid var(--primary-accent); padding: 1rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); animation: slideIn 0.3s ease; color: var(--text-main); font-weight: 500; max-width: 340px; font-size: 0.9rem; }
-.toast.error { border-left-color: var(--danger-accent); } .toast.success { border-left-color: var(--success-accent); } .toast.warning { border-left-color: var(--warning-accent); }
+.toast.error { border-left-color: var(--danger-accent); }
+.toast.success { border-left-color: var(--success-accent); }
+.toast.warning { border-left-color: var(--warning-accent); }
 @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 .loader { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; }
 .loader-dark { border: 3px solid var(--border-color); border-top: 3px solid var(--primary-accent); }
@@ -202,30 +227,41 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
             <h1 style="font-size: 2rem; background: linear-gradient(135deg, var(--primary-accent), var(--success-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">EARNWAVE</h1>
             <p class="text-muted">Premium Micro-Task Platform</p>
         </div>
+
         <form id="login-form">
-            <input type="text" id="login-identifier" placeholder="Email or Username" required value="demo@test.com">
-            <input type="password" id="login-password" placeholder="Password" required value="password123">
+            <input type="email" id="login-identifier" placeholder="Email Address" required autocomplete="email">
+            <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password">
             <button type="submit" class="btn-primary" style="width: 100%;" id="login-btn"><span>Sign In</span></button>
-            <p class="text-center text-muted mt-4" style="font-size: 0.85rem;">Don't have an account? <a href="#" id="show-register" style="color: var(--primary-accent);">Register here</a></p>
+            <p class="text-center text-muted mt-4" style="font-size: 0.85rem;">
+                Don't have an account? <a href="#" id="show-register" style="color: var(--primary-accent);">Register here</a>
+            </p>
         </form>
+
         <form id="register-form" class="hidden">
-            <input type="text" id="reg-username" placeholder="Username" required>
-            <input type="email" id="reg-email" placeholder="Email Address" required>
-            <input type="tel" id="reg-phone" placeholder="M-Pesa Phone (e.g. 2547...)" required>
-            <input type="password" id="reg-password" placeholder="Password (Min 8 chars, 1 uppercase, 1 number)" required>
+            <input type="text" id="reg-username" placeholder="Username" required autocomplete="username">
+            <input type="email" id="reg-email" placeholder="Email Address" required autocomplete="email">
+            <input type="tel" id="reg-phone" placeholder="M-Pesa Phone (e.g. 0712345678)" required
+                   autocomplete="tel"
+                   pattern="^(\+?254|0)?[17]\d{8}$"
+                   title="Enter a valid Kenyan number (e.g. 0712345678 or 254712345678)">
+            <input type="password" id="reg-password" placeholder="Password (Min 8 chars, 1 uppercase, 1 number)" required autocomplete="new-password">
             <div id="pwd-strength-container" class="hidden mb-4" style="font-size: 0.75rem; margin-top: -0.5rem;">
                 <div style="height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden; margin-bottom: 4px;">
                     <div id="pwd-strength-bar" style="height: 100%; width: 0%; transition: all 0.3s ease;"></div>
                 </div>
                 <span id="pwd-strength-text" class="text-muted">Password strength</span>
             </div>
-            <input type="password" id="reg-confirm-password" placeholder="Confirm Password" required>
+            <input type="password" id="reg-confirm-password" placeholder="Confirm Password" required autocomplete="new-password">
             <div class="flex items-center gap-2 mb-4" style="margin-top: 0.5rem;">
                 <input type="checkbox" id="reg-terms" required style="width: auto; margin-bottom: 0; cursor: pointer;">
-                <label for="reg-terms" class="text-muted" style="font-size: 0.85rem; cursor: pointer;">I agree to the <a href="#" style="color: var(--primary-accent);">Terms</a> and understand the KES 100 activation fee is non-refundable.</label>
+                <label for="reg-terms" class="text-muted" style="font-size: 0.85rem; cursor: pointer;">
+                    I agree to the <a href="#" style="color: var(--primary-accent);">Terms</a> and understand the KES 100 activation fee is non-refundable.
+                </label>
             </div>
             <button type="submit" class="btn-primary" style="width: 100%;" id="reg-btn"><span>Continue to Activation →</span></button>
-            <p class="text-center text-muted mt-4" style="font-size: 0.85rem;">Already have an account? <a href="#" id="show-login" style="color: var(--primary-accent);">Sign In</a></p>
+            <p class="text-center text-muted mt-4" style="font-size: 0.85rem;">
+                Already have an account? <a href="#" id="show-login" style="color: var(--primary-accent);">Sign In</a>
+            </p>
         </form>
     </div>
 </div>
@@ -237,31 +273,48 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
             <h1 style="font-size: 1.75rem; background: linear-gradient(135deg, var(--primary-accent), var(--success-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">EARNWAVE</h1>
             <p class="text-muted">Account Activation</p>
         </div>
+
         <div class="card wallet-card" style="margin-bottom: 1.25rem;">
             <p class="text-muted">Activation Fee</p>
             <h2 class="balance-amount">KES 100.00</h2>
             <p class="text-muted" style="font-size: 0.8rem;">One-time payment · Non-refundable</p>
         </div>
-        <p class="text-muted mb-4" style="font-size: 0.9rem;">Activation unlocks all earning tasks and prevents bot accounts. Complete both steps below.</p>
+
+        <p class="text-muted mb-4" style="font-size: 0.9rem;">
+            Activation unlocks all earning tasks and prevents bot accounts. Complete both steps below.
+        </p>
+
         <div id="payment-steps">
             <div class="payment-step" id="step-pay">
                 <div class="payment-step-num" id="step-pay-num">1</div>
                 <div class="payment-step-body">
                     <strong>Pay KES 100 via M-Pesa</strong>
-                    <span class="text-muted" style="font-size: 0.85rem;">Enter your M-Pesa number and confirm the STK push.</span>
-                    <button class="btn-primary mt-2" style="width: 100%;" id="pay-btn" onclick="app.initiatePayment()">Send M-Pesa Request</button>
+                    <span class="text-muted" style="font-size: 0.85rem;">Confirm the number below and press Send.</span>
+                    <input type="tel" id="activation-phone" placeholder="0712345678" required
+                           style="margin-top: 0.5rem; margin-bottom: 0.5rem;"
+                           pattern="^(\+?254|0)?[17]\d{8}$"
+                           title="Enter a valid Kenyan number">
+                    <button class="btn-primary mt-2" style="width: 100%;" id="pay-btn" onclick="app.initiatePayment()">
+                        Send M-Pesa Request
+                    </button>
                 </div>
             </div>
+
             <div class="payment-step" id="step-verify" style="opacity: 0.5;">
                 <div class="payment-step-num pending" id="step-verify-num">2</div>
                 <div class="payment-step-body">
                     <strong>Verify Payment</strong>
                     <span class="text-muted" style="font-size: 0.85rem;">Confirm the M-Pesa transaction completed.</span>
-                    <button class="btn-secondary mt-2" style="width: 100%;" id="verify-btn" onclick="app.verifyPayment(event)" disabled>I have paid — Verify</button>
+                    <button class="btn-secondary mt-2" style="width: 100%;" id="verify-btn" onclick="app.verifyPayment(event)" disabled>
+                        I have paid — Verify
+                    </button>
                 </div>
             </div>
         </div>
-        <button class="btn-ghost mt-4" style="width: 100%; color: var(--danger-accent);" onclick="app.logout()">Cancel & Sign Out</button>
+
+        <button class="btn-ghost mt-4" style="width: 100%; color: var(--danger-accent);" onclick="app.logout()">
+            Cancel & Sign Out
+        </button>
     </div>
 </div>
 
@@ -270,7 +323,9 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
     <button class="hamburger" id="hamburger" onclick="app.toggleSidebar()" aria-label="Menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
+
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="app.toggleSidebar()"></div>
+
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
             <span>EARNWAVE</span>
@@ -280,6 +335,7 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
         </div>
         <nav class="sidebar-nav" id="sidebar-nav"></nav>
     </aside>
+
     <div class="main-column">
         <header class="header">
             <div class="header-title" id="header-title">Dashboard</div>
@@ -290,6 +346,7 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
                 </div>
             </div>
         </header>
+
         <main class="content-area">
             <section id="dashboard-section" class="view-section active">
                 <div class="card wallet-card">
@@ -308,15 +365,18 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
                 <h3 class="mt-4 mb-2">Recent Transactions</h3>
                 <div class="card" id="recent-tx-container"></div>
             </section>
+
             <section id="tasks-section" class="view-section">
                 <h2 id="tasks-heading">All Tasks</h2>
                 <p class="text-muted mb-4" id="tasks-subheading">Every task has a one-time unlock fee deducted from your balance.</p>
                 <div class="filter-chips" id="filter-chips"></div>
                 <div class="task-grid" id="all-tasks-container"></div>
             </section>
+
             <section id="task-execution-section" class="view-section">
                 <div id="active-task-container"></div>
             </section>
+
             <section id="wallet-section" class="view-section">
                 <h2>Wallet</h2>
                 <div class="card wallet-card">
@@ -329,13 +389,16 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
                     <form id="withdraw-form">
                         <label class="text-muted mb-2" style="display:block; font-size: 0.85rem;">Amount (KES)</label>
                         <input type="number" id="withdraw-amount" placeholder="Min withdrawal: KES 100" min="100" required>
-                        <div class="flex justify-between text-muted mb-4" style="font-size: 0.85rem;"><span>Network Fee:</span><span>KES 20.00</span></div>
+                        <div class="flex justify-between text-muted mb-4" style="font-size: 0.85rem;">
+                            <span>Network Fee:</span><span>KES 20.00</span>
+                        </div>
                         <button type="submit" class="btn-primary" style="width: 100%;" id="withdraw-btn">Request Withdrawal</button>
                     </form>
                 </div>
                 <h3 class="mt-4 mb-2">Transaction History</h3>
                 <div class="card" id="full-tx-container" style="padding: 0 1.5rem;"></div>
             </section>
+
             <section id="profile-section" class="view-section">
                 <h2>Account Profile</h2>
                 <div class="card">
@@ -349,10 +412,22 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
                         </div>
                     </div>
                     <div class="flex flex-col gap-4 mt-4">
-                        <div class="flex justify-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;"><span class="text-muted">M-Pesa Number</span><span id="prof-phone" class="font-bold">...</span></div>
-                        <div class="flex justify-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;"><span class="text-muted">Lifetime Earnings</span><span id="prof-lifetime" class="font-bold text-success">KES 0.00</span></div>
-                        <div class="flex justify-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;"><span class="text-muted">Referral Code</span><span id="prof-refcode" class="font-bold" style="font-family: monospace;">...</span></div>
-                        <div class="flex justify-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;"><span class="text-muted">Account Status</span><span class="text-success font-bold" id="prof-status">ACTIVE</span></div>
+                        <div class="flex justify-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                            <span class="text-muted">M-Pesa Number</span>
+                            <div class="flex items-center gap-2">
+                                <span id="prof-phone" class="font-bold">...</span>
+                                <button class="btn-ghost" style="padding: 0.15rem 0.5rem; font-size: 0.75rem; color: var(--primary-accent);" onclick="app.editPhone()">Edit</button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                            <span class="text-muted">Lifetime Earnings</span><span id="prof-lifetime" class="font-bold text-success">KES 0.00</span>
+                        </div>
+                        <div class="flex justify-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                            <span class="text-muted">Referral Code</span><span id="prof-refcode" class="font-bold" style="font-family: monospace;">...</span>
+                        </div>
+                        <div class="flex justify-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                            <span class="text-muted">Account Status</span><span class="text-success font-bold" id="prof-status">ACTIVE</span>
+                        </div>
                     </div>
                     <button class="btn-secondary mt-4" style="width: 100%; color: var(--danger-accent); border-color: var(--danger-accent);" onclick="app.logout()">Sign Out Securely</button>
                     <button class="btn-ghost mt-2" style="width: 100%; font-size: 0.8rem;" onclick="app.resetData()">[Developer] Reset App Data</button>
@@ -362,9 +437,6 @@ input:focus, textarea:focus { outline: none; border-color: var(--primary-accent)
     </div>
 </div>
 
-<!-- ============================================================
-     MAIN APPLICATION SCRIPT
-============================================================ -->
 <script>
 const API_BASE = window.location.origin;
 
@@ -379,6 +451,7 @@ class EarnWaveApp {
     this.currentTaskFilter = 'All';
     this.currentSection = 'dashboard-section';
     this.paymentInitiated = false;
+    this.currentReference = null;
     this.initUI();
     this.waitForFirebase();
   }
@@ -400,6 +473,7 @@ class EarnWaveApp {
         await this.loadTasks();
         if (this.userDoc && this.userDoc.status === 'PENDING') {
           this.showView('activation-view');
+          this.prefillActivationPhone();
         } else {
           this.initAppSession();
         }
@@ -429,7 +503,7 @@ class EarnWaveApp {
       const { user } = await this.apiFetch('/api/user/bootstrap', {
         method: 'POST',
         body: JSON.stringify({
-          phone: this.currentUser.phoneNumber || '',
+          phone: '',
           username: this.currentUser.email?.split('@')[0] || 'user',
         }),
       });
@@ -449,8 +523,10 @@ class EarnWaveApp {
     document.getElementById('login-form').onsubmit = (e) => this.handleLogin(e);
     document.getElementById('register-form').onsubmit = (e) => this.handleRegister(e);
     document.getElementById('withdraw-form').onsubmit = (e) => this.handleWithdraw(e);
+
     const regPwd = document.getElementById('reg-password');
     if (regPwd) regPwd.addEventListener('input', (e) => this.checkPasswordStrength(e.target.value));
+
     const closeBtn = document.getElementById('sidebar-close');
     if (closeBtn) closeBtn.style.display = window.innerWidth >= 1024 ? 'none' : 'block';
     window.addEventListener('resize', () => {
@@ -473,7 +549,9 @@ class EarnWaveApp {
     const btn = document.getElementById('login-btn');
     const email = document.getElementById('login-identifier').value.trim();
     const password = document.getElementById('login-password').value;
-    btn.disabled = true; btn.innerHTML = '<div class="loader"></div>';
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader"></div>';
     try {
       const { signInWithEmailAndPassword } = window.fbAuthFns;
       await signInWithEmailAndPassword(window.fbAuth, email, password);
@@ -481,7 +559,8 @@ class EarnWaveApp {
     } catch (err) {
       this.showToast('Sign-in failed: ' + err.message, 'error');
     } finally {
-      btn.disabled = false; btn.innerHTML = '<span>Sign In</span>';
+      btn.disabled = false;
+      btn.innerHTML = '<span>Sign In</span>';
     }
   }
 
@@ -493,19 +572,32 @@ class EarnWaveApp {
     const phone = document.getElementById('reg-phone').value.trim();
     const password = document.getElementById('reg-password').value;
     const confirm = document.getElementById('reg-confirm-password').value;
+
+    if (!/^(\+?254|0)?[17]\d{8}$/.test(phone)) {
+      return this.showToast('Enter a valid Kenyan phone number (e.g. 0712345678).', 'error');
+    }
+
     if (password !== confirm) return this.showToast('Passwords do not match.', 'error');
     if (!this.checkPasswordStrength(password)) return this.showToast('Strengthen your password.', 'error');
-    btn.disabled = true; btn.innerHTML = '<div class="loader"></div>';
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader"></div>';
     try {
       const { createUserWithEmailAndPassword, updateProfile } = window.fbAuthFns;
       const cred = await createUserWithEmailAndPassword(window.fbAuth, email, password);
       await updateProfile(cred.user, { displayName: username });
-      await this.apiFetch('/api/user/bootstrap', { method: 'POST', body: JSON.stringify({ phone, username }) });
+
+      await this.apiFetch('/api/user/bootstrap', {
+        method: 'POST',
+        body: JSON.stringify({ phone, username }),
+      });
+
       this.showToast('Account created. Pay KES 100 to activate.', 'info');
     } catch (err) {
       this.showToast('Registration failed: ' + err.message, 'error');
     } finally {
-      btn.disabled = false; btn.innerHTML = '<span>Continue to Activation →</span>';
+      btn.disabled = false;
+      btn.innerHTML = '<span>Continue to Activation →</span>';
     }
   }
 
@@ -515,13 +607,36 @@ class EarnWaveApp {
     this.showToast('Signed out.', 'info');
   }
 
+  prefillActivationPhone() {
+    const actPhone = document.getElementById('activation-phone');
+    if (actPhone && this.userDoc && this.userDoc.phone) {
+      actPhone.value = this.userDoc.phone;
+    }
+  }
+
   async initiatePayment() {
     const btn = document.getElementById('pay-btn');
+    const phoneInput = document.getElementById('activation-phone');
+    const phone = phoneInput ? phoneInput.value.trim() : (this.userDoc ? this.userDoc.phone : '');
+
+    if (!phone || !/^(\+?254|0)?[17]\d{8}$/.test(phone)) {
+      return this.showToast('Enter a valid M-Pesa phone number.', 'error');
+    }
+
     if (this.paymentInitiated) return this.showToast('Request already sent.', 'info');
-    btn.disabled = true; btn.innerHTML = '<div class="loader"></div> Sending STK push...';
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader"></div> Sending STK push...';
+
     try {
-      const result = await this.apiFetch('/api/payment/activation', { method: 'POST', body: JSON.stringify({ phone: this.userDoc.phone }) });
+      const result = await this.apiFetch('/api/payment/activation', {
+        method: 'POST',
+        body: JSON.stringify({ phone }),
+      });
+
       this.paymentInitiated = true;
+      this.currentReference = result.reference;
+
       btn.innerHTML = '✓ Request sent. Check your phone.';
       document.getElementById('step-pay-num').classList.add('done');
       document.getElementById('step-pay-num').textContent = '✓';
@@ -531,42 +646,87 @@ class EarnWaveApp {
       this.showToast('STK push sent. Enter your M-Pesa PIN.', 'success');
     } catch (err) {
       this.showToast('Payment failed: ' + err.message, 'error');
-      btn.disabled = false; btn.innerHTML = 'Send M-Pesa Request';
+      btn.disabled = false;
+      btn.innerHTML = 'Send M-Pesa Request';
     }
   }
 
   async verifyPayment(e) {
     const btn = e.target;
-    btn.disabled = true; btn.innerHTML = '<div class="loader loader-dark"></div> Checking...';
-    try {
-      for (let i = 0; i < 10; i++) {
-        await new Promise(r => setTimeout(r, 2000));
-        const { user } = await this.apiFetch('/api/user/me');
-        if (user.status === 'ACTIVE') {
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader loader-dark"></div> Checking status...';
+
+    const reference = this.currentReference;
+    if (!reference) {
+      btn.disabled = false;
+      btn.innerHTML = 'I have paid — Verify';
+      return this.showToast('No payment in progress.', 'error');
+    }
+
+    for (let i = 0; i < 15; i++) {
+      await new Promise(r => setTimeout(r, 2000));
+
+      try {
+        const result = await this.apiFetch(`/api/payment/status/${reference}`);
+
+        if (result.status === 'SUCCESS') {
+          const { user } = await this.apiFetch('/api/user/me');
           this.userDoc = user;
           this.showToast('Activation successful!', 'success');
           btn.innerHTML = '✓ Activated';
           setTimeout(() => this.initAppSession(), 500);
           return;
         }
+
+        if (result.status === 'FAILED') {
+          this.showToast('Payment failed or was cancelled. Please try again.', 'error');
+          btn.disabled = false;
+          btn.innerHTML = 'Try Again';
+          this.paymentInitiated = false;
+          return;
+        }
+
+        btn.innerHTML = `<div class="loader loader-dark"></div> Waiting... (${i + 1}/15)`;
+      } catch (err) {
+        console.warn('[verifyPayment] poll error:', err.message);
       }
-      this.showToast('Payment not confirmed yet. Try again in a moment.', 'warning');
-      btn.disabled = false; btn.innerHTML = 'I have paid — Verify';
-    } catch (err) {
-      this.showToast('Verification error: ' + err.message, 'error');
-      btn.disabled = false; btn.innerHTML = 'I have paid — Verify';
     }
+
+    this.showToast('Still waiting for confirmation. Check back in a minute.', 'warning');
+    btn.disabled = false;
+    btn.innerHTML = 'Check Status Again';
   }
 
   initAppSession() {
     this.showView('main-view');
     document.getElementById('prof-username').textContent = this.userDoc.username;
     document.getElementById('prof-email').textContent = this.userDoc.email;
-    document.getElementById('prof-phone').textContent = this.userDoc.phone;
+    document.getElementById('prof-phone').textContent = this.userDoc.phone || '—';
     document.getElementById('prof-refcode').textContent = this.userDoc.referralCode;
-    document.getElementById('user-mpesa-number').textContent = this.userDoc.phone;
+    document.getElementById('user-mpesa-number').textContent = this.userDoc.phone || '—';
     this.updateWalletUI();
     this.navigate('dashboard-section');
+  }
+
+  async editPhone() {
+    const current = this.userDoc.phone || '';
+    const next = prompt('Enter your M-Pesa phone number (e.g. 0712345678):', current);
+    if (next === null) return;
+    if (!/^(\+?254|0)?[17]\d{8}$/.test(next.trim())) {
+      return this.showToast('Invalid phone format.', 'error');
+    }
+    try {
+      const result = await this.apiFetch('/api/user/phone', {
+        method: 'POST',
+        body: JSON.stringify({ phone: next.trim() }),
+      });
+      this.userDoc.phone = result.phone;
+      document.getElementById('prof-phone').textContent = result.phone;
+      document.getElementById('user-mpesa-number').textContent = result.phone;
+      this.showToast('Phone number updated.', 'success');
+    } catch (err) {
+      this.showToast('Update failed: ' + err.message, 'error');
+    }
   }
 
   updateWalletUI() {
@@ -633,6 +793,7 @@ class EarnWaveApp {
     const target = document.getElementById(sectionId);
     if (target) target.classList.add('active');
     document.querySelector('.content-area').scrollTop = 0;
+
     if (sectionId === 'dashboard-section') { this.renderTasks(true); this.renderTransactions(true); }
     if (sectionId === 'tasks-section') {
       document.getElementById('tasks-heading').textContent = this.currentTaskFilter === 'All' ? 'All Tasks' : this.currentTaskFilter;
@@ -686,7 +847,10 @@ class EarnWaveApp {
     nav.querySelectorAll('.nav-item').forEach(item => {
       item.onclick = () => {
         if (item.dataset.target) this.navigate(item.dataset.target);
-        else if (item.dataset.category) { this.currentTaskFilter = item.dataset.category; this.navigate('tasks-section', true); }
+        else if (item.dataset.category) {
+          this.currentTaskFilter = item.dataset.category;
+          this.navigate('tasks-section', true);
+        }
         this.closeSidebarIfMobile();
       };
     });
@@ -741,7 +905,8 @@ class EarnWaveApp {
         <p class="text-muted mb-2" style="font-size: 0.88rem;">${task.brief ? task.brief.substring(0, 110) + '...' : ''}</p>
         <div class="mb-2"><span class="status-badge ${statusClass}">${task.status}</span>${feeBadge}</div>
       </div>
-      <button class="btn-secondary" style="width: 100%; ${!isClosed ? 'border-color: var(--primary-accent); color: var(--primary-accent);' : ''}" onclick="app.startTask('${task.id}')" ${isClosed ? 'disabled' : ''}>${btnText}</button>
+      <button class="btn-secondary" style="width: 100%; ${!isClosed ? 'border-color: var(--primary-accent); color: var(--primary-accent);' : ''}"
+        onclick="app.startTask('${task.id}')" ${isClosed ? 'disabled' : ''}>${btnText}</button>
     </div>`;
   }
 
@@ -775,11 +940,15 @@ class EarnWaveApp {
     if (!task) return this.showToast('Task not found.', 'error');
     const cat = this.categories.find(c => c.id === task.categoryId);
     const fee = cat ? cat.unlockFee : 15;
+
     if (task.status === 'AVAILABLE') {
       if (this.userDoc.balance < fee) return this.showToast(`Need KES ${fee.toFixed(2)} to unlock.`, 'error');
       if (!confirm(`Unlock this task for KES ${fee.toFixed(2)}?`)) return;
       try {
-        const result = await this.apiFetch('/api/payment/unlock', { method: 'POST', body: JSON.stringify({ taskId }) });
+        const result = await this.apiFetch('/api/payment/unlock', {
+          method: 'POST',
+          body: JSON.stringify({ taskId }),
+        });
         this.userDoc.balance = result.newBalance;
         task.status = 'OPENED';
         this.updateWalletUI();
@@ -788,6 +957,7 @@ class EarnWaveApp {
         return this.showToast('Unlock failed: ' + err.message, 'error');
       }
     }
+
     this.activeTask = task;
     this.taskState = { step: 1, answers: {}, startedAt: Date.now() };
     const renderer = this[`renderShell${task.flow.charAt(0).toUpperCase() + task.flow.slice(1).toLowerCase()}`];
@@ -795,8 +965,6 @@ class EarnWaveApp {
     else this.renderShellProcedural(task);
     this.navigate('task-execution-section');
   }
-
-  // ============ SHELL RENDERERS ============
 
   shellHeaderHTML(extra = '') {
     return `<div class="shell-header"><button class="btn-secondary shell-back" onclick="app.navigate('tasks-section')">← Back</button>${extra}</div>`;
@@ -810,9 +978,10 @@ class EarnWaveApp {
   mediaBlockHTML(m) {
     if (m.type === 'image') return `<figure class="media-block"><img src="${m.url}" alt="${m.caption || ''}" class="img-zoom" onclick="window.open('${m.url}', '_blank')" loading="lazy">${m.caption ? `<figcaption class="media-caption">${m.caption}</figcaption>` : ''}</figure>`;
     if (m.type === 'audio') return `<figure class="media-block"><audio controls preload="none" style="width: 100%;"><source src="${m.url}"></audio>${m.caption ? `<figcaption class="media-caption">${m.caption}</figcaption>` : ''}</figure>`;
-    if (m.type === 'video') return `<figure class="media-block"><div style="position: relative; padding-bottom: 56.25%; height: 0; border-radius: 10px; overflow: hidden;"><iframe src="${m.embedUrl}" frameborder="0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" allowfullscreen></iframe></div>${m.caption ? `<figcaption class="media-caption">${m.caption}</figcaption>` : ''}</figure>`;
+    if (m.type === 'video') return `<figure class="media-block"><div style="position: relative; padding-bottom: 56.25%; height: 0; border-radius: 10px; overflow: hidden;"><iframe src="${m.embedUrl}" frameborder="0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>${m.caption ? `<figcaption class="media-caption">${m.caption}</figcaption>` : ''}</figure>`;
     if (m.type === 'text') return `<figure class="media-block"><div class="moderation-item" style="font-family: inherit; white-space: pre-wrap; font-style: normal;">${m.content}</div>${m.caption ? `<figcaption class="media-caption">${m.caption}</figcaption>` : ''}</figure>`;
     if (m.type === 'map') return `<figure class="media-block"><iframe src="${m.embedUrl}" style="width: 100%; height: 240px; border: 0; border-radius: 10px;" loading="lazy"></iframe>${m.caption ? `<figcaption class="media-caption">${m.caption}</figcaption>` : ''}</figure>`;
+    if (m.type === 'document') return `<figure class="media-block doc-preview"><img src="${m.url}" alt="Document" style="width: 100%; display: block;" onclick="window.open('${m.url}', '_blank')" loading="lazy"><div class="flex gap-2" style="padding: 0.75rem;"><a href="${m.url}" target="_blank" class="btn-secondary" style="flex: 1; text-decoration: none; font-size: 0.85rem; padding: 0.5rem;">📄 Open</a><a href="${m.url}" download class="btn-secondary" style="flex: 1; text-decoration: none; font-size: 0.85rem; padding: 0.5rem;">⬇ Download</a></div>${m.caption ? `<figcaption class="media-caption">${m.caption}</figcaption>` : ''}</figure>`;
     return '';
   }
 
@@ -823,6 +992,11 @@ class EarnWaveApp {
   renderInstructions(task) {
     if (!task.instructions || !task.instructions.length) return '';
     return `<h3 class="section-heading">✏️ Step-by-Step Instructions</h3><ol class="task-instructions">${task.instructions.map(s => `<li>${s}</li>`).join('')}</ol>`;
+  }
+
+  renderSample(task) {
+    if (!task.sampleOutput) return '';
+    return `<h3 class="section-heading">✅ Sample of Acceptable Output</h3><div class="sample-output">${task.sampleOutput}</div>`;
   }
 
   renderAcceptance(task) {
@@ -842,7 +1016,12 @@ class EarnWaveApp {
       ${this.shellHeaderHTML(`<span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span>`)}
       <span class="task-badge">${task.categoryId}</span>
       <h2 style="font-size: 1.3rem;">${task.title}</h2>
-      ${this.renderBrief(task)}${this.renderReferenceMedia(task)}${this.renderInstructions(task)}${this.renderAcceptance(task)}${this.renderAntiPatterns(task)}
+      ${this.renderBrief(task)}
+      ${this.renderReferenceMedia(task)}
+      ${this.renderInstructions(task)}
+      ${this.renderSample(task)}
+      ${this.renderAcceptance(task)}
+      ${this.renderAntiPatterns(task)}
       <button class="btn-primary" style="width: 100%; margin: 1rem 0;" onclick="window.open('${url}', '_blank')">Open Review Page ↗</button>
       <label class="text-muted" style="display:block; font-size:0.85rem; margin-bottom:0.4rem;">Paste the link to your published review</label>
       <input type="url" id="proof-url" placeholder="https://..." oninput="app.validateProofUrl(this.value)">
@@ -859,46 +1038,91 @@ class EarnWaveApp {
     const c = document.getElementById('active-task-container');
     const totalSteps = task.steps || 3;
     this.taskState.step = 1;
+
     const draw = () => {
       const s = this.taskState.step;
       const pct = (s / totalSteps) * 100;
       let body = '';
+
       if (s === 1) {
-        body = `${this.renderBrief(task)}${this.renderReferenceMedia(task)}${this.renderInstructions(task)}${this.renderAcceptance(task)}${this.renderAntiPatterns(task)}
-          <label class="flex items-center gap-2 mb-4" style="cursor: pointer;"><input type="checkbox" id="ack" style="width: auto; margin: 0;" onchange="document.getElementById('step-next').disabled = !this.checked"><span class="text-muted" style="font-size: 0.9rem;">I have read and understood the instructions.</span></label>
-          <button class="btn-primary" id="step-next" style="width: 100%;" disabled onclick="app.proceduralNext()">Begin Work →</button>`;
+        body = `
+          ${this.renderBrief(task)}
+          ${this.renderReferenceMedia(task)}
+          ${this.renderInstructions(task)}
+          ${this.renderSample(task)}
+          ${this.renderAcceptance(task)}
+          ${this.renderAntiPatterns(task)}
+          <label class="flex items-center gap-2 mb-4" style="cursor: pointer;">
+            <input type="checkbox" id="ack" style="width: auto; margin: 0;" onchange="document.getElementById('step-next').disabled = !this.checked">
+            <span class="text-muted" style="font-size: 0.9rem;">I have read and understood the instructions.</span>
+          </label>
+          <button class="btn-primary" id="step-next" style="width: 100%;" disabled onclick="app.proceduralNext()">Begin Work →</button>
+        `;
       } else if (s === 2) {
         const it = task.interactType;
         if (it === 'transcribe') {
           const minW = (task.payload && task.payload.minWords) || 40;
-          body = `<h3 class="section-heading">💻 Workspace</h3>
+          body = `
+            <h3 class="section-heading">💻 Workspace</h3>
             ${task.payload && task.payload.audioDuration ? `<div class="audio-player"><button class="btn-secondary" style="padding: 0.5rem 0.9rem;" onclick="app.fakePlayAudio(this)">▶ Play</button><div class="audio-bar-track"><div class="audio-bar-fill" id="audio-bar"></div></div></div>` : ''}
             <textarea id="task-input" rows="7" placeholder="Start typing..." oninput="app.updateWordCount(this, ${minW})"></textarea>
             <div class="text-muted mb-4" style="font-size: 0.8rem;" id="word-count">Words: 0 / ${minW} minimum</div>
-            <button class="btn-primary" id="step-next" style="width: 100%;" disabled onclick="app.proceduralNext()">Review →</button>`;
+            <button class="btn-primary" id="step-next" style="width: 100%;" disabled onclick="app.proceduralNext()">Review →</button>
+          `;
         } else if (it === 'sentiment') {
-          body = `<h3 class="section-heading">💻 Workspace</h3><div class="moderation-item" style="font-style: italic;">${task.payload.text}</div>
+          body = `
+            <h3 class="section-heading">💻 Workspace</h3>
+            <div class="moderation-item" style="font-style: italic;">${task.payload.text}</div>
             <div class="flex flex-col gap-2 mb-4">
               <div class="survey-option" onclick="app.proceduralSentimentPick(this,'Positive')">😊 Positive</div>
               <div class="survey-option" onclick="app.proceduralSentimentPick(this,'Neutral')">😐 Neutral</div>
               <div class="survey-option" onclick="app.proceduralSentimentPick(this,'Negative')">😠 Negative</div>
               <div class="survey-option" onclick="app.proceduralSentimentPick(this,'Mixed')">🤔 Mixed</div>
-            </div><button class="btn-primary" id="step-next" style="width: 100%;" disabled onclick="app.proceduralNext()">Review →</button>`;
+            </div>
+            <button class="btn-primary" id="step-next" style="width: 100%;" disabled onclick="app.proceduralNext()">Review →</button>
+          `;
         } else if (it === 'annotate') {
           const words = ((task.payload && task.payload.annotationText) || '').split(' ');
-          body = `<h3 class="section-heading">💻 Workspace</h3><div class="moderation-item" style="line-height: 2.2;">${words.map((w, i) => `<span class="annotate-token" data-idx="${i}" onclick="this.classList.toggle('selected')">${w}</span>`).join(' ')}</div><button class="btn-primary" id="step-next" style="width: 100%;" onclick="app.proceduralNext()">Review →</button>`;
+          body = `
+            <h3 class="section-heading">💻 Workspace</h3>
+            <div class="moderation-item" style="line-height: 2.2;">${words.map((w, i) => `<span class="annotate-token" data-idx="${i}" onclick="this.classList.toggle('selected')">${w}</span>`).join(' ')}</div>
+            <button class="btn-primary" id="step-next" style="width: 100%;" onclick="app.proceduralNext()">Review →</button>
+          `;
         } else if (it === 'captcha') {
           const code = Math.random().toString(36).substring(2, 8).toUpperCase();
           this.taskState.captcha = code;
-          body = `<h3 class="section-heading">💻 Workspace</h3><div class="captcha-box">${code}</div><input type="text" id="task-input" placeholder="Enter characters..." autocomplete="off" oninput="app.captchaInput(this)"><button class="btn-primary" id="step-next" style="width: 100%;" disabled onclick="app.proceduralNext()">Review →</button>`;
+          body = `
+            <h3 class="section-heading">💻 Workspace</h3>
+            <div class="captcha-box">${code}</div>
+            <input type="text" id="task-input" placeholder="Enter characters..." autocomplete="off" oninput="app.captchaInput(this)">
+            <button class="btn-primary" id="step-next" style="width: 100%;" disabled onclick="app.proceduralNext()">Review →</button>
+          `;
         } else {
-          body = `<h3 class="section-heading">💻 Workspace</h3><textarea id="task-input" rows="6" placeholder="Enter your response..."></textarea><button class="btn-primary" id="step-next" style="width: 100%;" onclick="app.proceduralNext()">Review →</button>`;
+          body = `
+            <h3 class="section-heading">💻 Workspace</h3>
+            <textarea id="task-input" rows="6" placeholder="Enter your response..."></textarea>
+            <button class="btn-primary" id="step-next" style="width: 100%;" onclick="app.proceduralNext()">Review →</button>
+          `;
         }
       } else {
         const val = this.taskState.answers.text || this.taskState.answers.sentiment || this.taskState.answers.captcha || '(no input)';
-        body = `<h3 class="section-heading">🔍 Review your submission</h3><div class="card" style="background: var(--bg-surface-hover); font-size: 0.9rem; white-space: pre-wrap; padding: 1rem;">${val}</div><p class="text-muted mb-4" style="font-size: 0.85rem;">Once submitted, this cannot be edited.</p><button class="btn-primary" style="width: 100%;" onclick="app.submitActiveTask()">Submit & Claim ${this.formatCurrency(task.reward)}</button>`;
+        body = `
+          <h3 class="section-heading">🔍 Review your submission</h3>
+          <div class="card" style="background: var(--bg-surface-hover); font-size: 0.9rem; white-space: pre-wrap; padding: 1rem;">${val}</div>
+          <p class="text-muted mb-4" style="font-size: 0.85rem;">Once submitted, this cannot be edited.</p>
+          <button class="btn-primary" style="width: 100%;" onclick="app.submitActiveTask()">Submit & Claim ${this.formatCurrency(task.reward)}</button>
+        `;
       }
-      c.innerHTML = `${this.shellHeaderHTML(`<span class="text-muted" style="font-size:0.85rem;">Step ${s} of ${totalSteps}</span>`)}<div class="step-header"><span class="text-muted">${task.subType || task.categoryId}</span><span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span></div><div class="progress-track"><div class="progress-fill" style="width: ${pct}%;"></div></div>${body}`;
+
+      c.innerHTML = `
+        ${this.shellHeaderHTML(`<span class="text-muted" style="font-size:0.85rem;">Step ${s} of ${totalSteps}</span>`)}
+        <div class="step-header">
+          <span class="text-muted">${task.subType || task.categoryId}</span>
+          <span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width: ${pct}%;"></div></div>
+        ${body}
+      `;
     };
 
     this.proceduralNext = () => {
@@ -920,6 +1144,7 @@ class EarnWaveApp {
       this.taskState.step++;
       draw();
     };
+
     this.proceduralSentimentPick = (el, val) => {
       document.querySelectorAll('.survey-option').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
@@ -927,12 +1152,18 @@ class EarnWaveApp {
       this.taskState.answers.text = val;
       document.getElementById('step-next').disabled = false;
     };
+
     this.updateWordCount = (el, min) => {
       const words = el.value.trim().split(/\s+/).filter(Boolean).length;
       document.getElementById('word-count').textContent = `Words: ${words} / ${min} minimum`;
       document.getElementById('step-next').disabled = words < min;
     };
-    this.captchaInput = (el) => { const b = document.getElementById('step-next'); if (b) b.disabled = el.value.trim().length < 3; };
+
+    this.captchaInput = (el) => {
+      const b = document.getElementById('step-next');
+      if (b) b.disabled = el.value.trim().length < 3;
+    };
+
     this.fakePlayAudio = (btn) => {
       if (btn.dataset.playing) return;
       btn.dataset.playing = '1';
@@ -946,6 +1177,7 @@ class EarnWaveApp {
         if (t >= total) { clearInterval(iv); btn.textContent = '✓ Played'; }
       }, 250);
     };
+
     draw();
   }
 
@@ -954,28 +1186,76 @@ class EarnWaveApp {
     const questions = (task.payload && task.payload.questions) || [{ q: 'Question?', a: ['A', 'B', 'C'] }];
     let idx = 0;
     const answers = {};
+
     const draw = () => {
       const q = questions[idx];
       const pct = ((idx + 1) / questions.length) * 100;
-      c.innerHTML = `${this.shellHeaderHTML(`<span class="text-muted" style="font-size:0.85rem;">Question ${idx + 1} of ${questions.length}</span>`)}<div class="step-header"><span class="text-muted">${task.subType || task.categoryId}</span><span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span></div><div class="progress-track"><div class="progress-fill" style="width: ${pct}%;"></div></div>${idx === 0 ? this.renderBrief(task) + this.renderReferenceMedia(task) : ''}<h2 style="font-size: 1.15rem; margin: 1rem 0 1.5rem 0;">${q.q}</h2><div class="flex flex-col gap-2 mb-4">${q.a.map(opt => `<div class="survey-option ${answers[idx] === opt ? 'selected' : ''}" onclick="app.surveyPick(${idx}, ${JSON.stringify(opt)})">${opt}</div>`).join('')}</div><div class="flex gap-2">${idx > 0 ? `<button class="btn-secondary" style="flex: 1;" onclick="app.surveyBack()">← Back</button>` : ''}<button class="btn-primary" style="flex: 2;" id="survey-next" ${answers[idx] ? '' : 'disabled'} onclick="app.surveyNext()">${idx === questions.length - 1 ? 'Submit Survey' : 'Next →'}</button></div>`;
+      c.innerHTML = `
+        ${this.shellHeaderHTML(`<span class="text-muted" style="font-size:0.85rem;">Question ${idx + 1} of ${questions.length}</span>`)}
+        <div class="step-header">
+          <span class="text-muted">${task.subType || task.categoryId}</span>
+          <span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width: ${pct}%;"></div></div>
+        ${idx === 0 ? this.renderBrief(task) + this.renderReferenceMedia(task) : ''}
+        <h2 style="font-size: 1.15rem; margin: 1rem 0 1.5rem 0;">${q.q}</h2>
+        <div class="flex flex-col gap-2 mb-4">
+          ${q.a.map(opt => `<div class="survey-option ${answers[idx] === opt ? 'selected' : ''}" onclick="app.surveyPick(${idx}, ${JSON.stringify(opt)})">${opt}</div>`).join('')}
+        </div>
+        <div class="flex gap-2">
+          ${idx > 0 ? `<button class="btn-secondary" style="flex: 1;" onclick="app.surveyBack()">← Back</button>` : ''}
+          <button class="btn-primary" style="flex: 2;" id="survey-next" ${answers[idx] ? '' : 'disabled'} onclick="app.surveyNext()">${idx === questions.length - 1 ? 'Submit Survey' : 'Next →'}</button>
+        </div>
+      `;
     };
+
     this.surveyPick = (i, val) => { answers[i] = val; draw(); };
     this.surveyBack = () => { if (idx > 0) { idx--; draw(); } };
     this.surveyNext = () => {
       if (!answers[idx]) return;
-      if (idx === questions.length - 1) { this.taskState.answers = answers; this.submitActiveTask(); }
-      else { idx++; draw(); }
+      if (idx === questions.length - 1) {
+        this.taskState.answers = answers;
+        this.submitActiveTask();
+      } else { idx++; draw(); }
     };
+
     draw();
   }
 
   renderShellRating(task) {
     const c = document.getElementById('active-task-container');
     let stars = 0;
-    c.innerHTML = `${this.shellHeaderHTML(`<span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span>`)}<span class="task-badge">${task.subType || task.categoryId}</span><h2 style="font-size: 1.2rem; margin-top: 0.5rem;">${task.title}</h2>${this.renderBrief(task)}${this.renderReferenceMedia(task)}${this.renderInstructions(task)}<p class="font-semibold mb-2" style="font-size: 0.95rem;">How would you rate this?</p><div class="star-rating">${[1,2,3,4,5].map(n => `<span class="star" data-n="${n}" onclick="app.setStars(${n})">★</span>`).join('')}</div><label class="text-muted mb-2" style="display:block; font-size: 0.85rem;">Tell us why (minimum 15 words)</label><textarea id="rating-text" rows="4" placeholder="Explain your rating..." oninput="app.ratingTextInput(this)"></textarea><div class="text-muted mb-4" style="font-size: 0.8rem;" id="rating-wc">Words: 0 / 15 minimum</div><button class="btn-primary" id="shell-submit" style="width: 100%;" disabled onclick="app.submitActiveTask()">Submit Rating — ${this.formatCurrency(task.reward)}</button>`;
-    this.setStars = (n) => { stars = n; this.taskState.answers.stars = n; document.querySelectorAll('.star').forEach(s => s.classList.toggle('active', parseInt(s.dataset.n) <= n)); this.checkRatingSubmit(); };
-    this.ratingTextInput = (el) => { this.taskState.answers.text = el.value; const words = el.value.trim().split(/\s+/).filter(Boolean).length; document.getElementById('rating-wc').textContent = `Words: ${words} / 15 minimum`; this.checkRatingSubmit(); };
-    this.checkRatingSubmit = () => { const words = (this.taskState.answers.text || '').trim().split(/\s+/).filter(Boolean).length; document.getElementById('shell-submit').disabled = !(stars > 0 && words >= 15); };
+    c.innerHTML = `
+      ${this.shellHeaderHTML(`<span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span>`)}
+      <span class="task-badge">${task.subType || task.categoryId}</span>
+      <h2 style="font-size: 1.2rem; margin-top: 0.5rem;">${task.title}</h2>
+      ${this.renderBrief(task)}
+      ${this.renderReferenceMedia(task)}
+      ${this.renderInstructions(task)}
+      <p class="font-semibold mb-2" style="font-size: 0.95rem;">How would you rate this?</p>
+      <div class="star-rating">${[1,2,3,4,5].map(n => `<span class="star" data-n="${n}" onclick="app.setStars(${n})">★</span>`).join('')}</div>
+      <label class="text-muted mb-2" style="display:block; font-size: 0.85rem;">Tell us why (minimum 15 words)</label>
+      <textarea id="rating-text" rows="4" placeholder="Explain your rating..." oninput="app.ratingTextInput(this)"></textarea>
+      <div class="text-muted mb-4" style="font-size: 0.8rem;" id="rating-wc">Words: 0 / 15 minimum</div>
+      <button class="btn-primary" id="shell-submit" style="width: 100%;" disabled onclick="app.submitActiveTask()">Submit Rating — ${this.formatCurrency(task.reward)}</button>
+    `;
+
+    this.setStars = (n) => {
+      stars = n;
+      this.taskState.answers.stars = n;
+      document.querySelectorAll('.star').forEach(s => s.classList.toggle('active', parseInt(s.dataset.n) <= n));
+      this.checkRatingSubmit();
+    };
+    this.ratingTextInput = (el) => {
+      this.taskState.answers.text = el.value;
+      const words = el.value.trim().split(/\s+/).filter(Boolean).length;
+      document.getElementById('rating-wc').textContent = `Words: ${words} / 15 minimum`;
+      this.checkRatingSubmit();
+    };
+    this.checkRatingSubmit = () => {
+      const words = (this.taskState.answers.text || '').trim().split(/\s+/).filter(Boolean).length;
+      document.getElementById('shell-submit').disabled = !(stars > 0 && words >= 15);
+    };
   }
 
   renderShellTimed(task) {
@@ -983,59 +1263,185 @@ class EarnWaveApp {
     const items = (task.payload && task.payload.items) || [];
     const timeLimit = (task.payload && task.payload.timeLimit) || 60;
     let idx = 0, correct = 0, answered = 0, timeLeft = timeLimit, timerId = null;
+
     const finish = () => {
       if (timerId) clearInterval(timerId);
       const btn = document.getElementById('shell-submit');
-      if (btn) { btn.disabled = false; btn.innerHTML = `Submit (${answered} answered) — ${this.formatCurrency(task.reward)}`; }
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `Submit (${answered} answered) — ${this.formatCurrency(task.reward)}`;
+      }
       document.querySelectorAll('.mod-btn').forEach(b => b.disabled = true);
     };
-    const drawTimer = () => { const el = document.getElementById('timer-display'); if (!el) return; const m = Math.floor(timeLeft / 60), s = String(timeLeft % 60).padStart(2, '0'); el.textContent = `⏱ ${m}:${s}`; el.classList.toggle('urgent', timeLeft <= 10); };
+
+    const drawTimer = () => {
+      const el = document.getElementById('timer-display');
+      if (!el) return;
+      const m = Math.floor(timeLeft / 60), s = String(timeLeft % 60).padStart(2, '0');
+      el.textContent = `⏱ ${m}:${s}`;
+      el.classList.toggle('urgent', timeLeft <= 10);
+    };
+
     const drawItem = () => {
       const item = items[idx];
       if (!item) return finish();
-      c.querySelector('#item-block').innerHTML = `<div class="moderation-item">${item.text}</div><div class="flex gap-2 mb-4"><button class="btn-success mod-btn" style="flex: 1;" onclick="app.modAnswer(false)">✓ Approve</button><button class="btn-danger mod-btn" style="flex: 1;" onclick="app.modAnswer(true)">✗ Reject</button></div><div class="text-muted text-center" style="font-size: 0.8rem;">Item ${idx + 1} of ${items.length}</div>`;
+      c.querySelector('#item-block').innerHTML = `
+        <div class="moderation-item">${item.text}</div>
+        <div class="flex gap-2 mb-4">
+          <button class="btn-success mod-btn" style="flex: 1;" onclick="app.modAnswer(false)">✓ Approve</button>
+          <button class="btn-danger mod-btn" style="flex: 1;" onclick="app.modAnswer(true)">✗ Reject</button>
+        </div>
+        <div class="text-muted text-center" style="font-size: 0.8rem;">Item ${idx + 1} of ${items.length}</div>
+      `;
     };
-    c.innerHTML = `${this.shellHeaderHTML(`<span class="timer-display" id="timer-display">⏱ ${Math.floor(timeLimit/60)}:${String(timeLimit%60).padStart(2,'0')}</span>`)}<span class="task-badge">${task.subType || task.categoryId}</span><h2 style="font-size: 1.15rem; margin-top: 0.5rem;">${task.title}</h2>${this.renderBrief(task)}${this.renderInstructions(task)}<div id="item-block"></div><button class="btn-primary" id="shell-submit" style="width: 100%;" disabled onclick="app.submitActiveTask()">Submit (0 answered)</button>`;
-    this.modAnswer = (userSaysToxic) => { const item = items[idx]; if (!item) return; answered++; if (userSaysToxic === item.toxic) correct++; idx++; if (idx >= items.length) finish(); else drawItem(); };
+
+    c.innerHTML = `
+      ${this.shellHeaderHTML(`<span class="timer-display" id="timer-display">⏱ ${Math.floor(timeLimit/60)}:${String(timeLimit%60).padStart(2,'0')}</span>`)}
+      <span class="task-badge">${task.subType || task.categoryId}</span>
+      <h2 style="font-size: 1.15rem; margin-top: 0.5rem;">${task.title}</h2>
+      ${this.renderBrief(task)}
+      ${this.renderInstructions(task)}
+      <div id="item-block"></div>
+      <button class="btn-primary" id="shell-submit" style="width: 100%;" disabled onclick="app.submitActiveTask()">Submit (0 answered)</button>
+    `;
+
+    this.modAnswer = (userSaysToxic) => {
+      const item = items[idx];
+      if (!item) return;
+      answered++;
+      if (userSaysToxic === item.toxic) correct++;
+      idx++;
+      if (idx >= items.length) finish();
+      else drawItem();
+    };
+
     drawItem();
-    timerId = setInterval(() => { timeLeft--; drawTimer(); if (timeLeft <= 0) { this.showToast("Time's up!", "warning"); finish(); } }, 1000);
+    timerId = setInterval(() => {
+      timeLeft--;
+      drawTimer();
+      if (timeLeft <= 0) {
+        this.showToast("Time's up!", "warning");
+        finish();
+      }
+    }, 1000);
     this.taskState.timerId = timerId;
   }
 
   renderShellUpload(task) {
     const c = document.getElementById('active-task-container');
     const phrase = (task.payload && task.payload.phrase) || 'Sample phrase.';
-    c.innerHTML = `${this.shellHeaderHTML(`<span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span>`)}<span class="task-badge">${task.subType || task.categoryId}</span><h2 style="font-size: 1.2rem; margin-top: 0.5rem;">${task.title}</h2>${this.renderBrief(task)}${this.renderReferenceMedia(task)}${this.renderInstructions(task)}<p class="font-semibold mb-2" style="font-size: 0.95rem;">Read this phrase aloud:</p><div class="moderation-item" style="text-align: center; font-style: italic; font-size: 1.05rem;">"${phrase}"</div><button class="record-btn" id="record-btn" onclick="app.toggleRecording()">⬤ Tap to Record</button><div class="text-center text-muted mb-4" style="font-size: 0.85rem;" id="record-status">Ready when you are.</div><div class="flex gap-2 mb-4" id="playback-row" style="display: none;"><button class="btn-secondary" style="flex: 1;" onclick="app.previewRecording()">▶ Preview</button><button class="btn-secondary" style="flex: 1;" onclick="app.resetRecording()">↻ Re-record</button></div><button class="btn-primary" id="shell-submit" style="width: 100%;" disabled onclick="app.submitActiveTask()">Submit Recording — ${this.formatCurrency(task.reward)}</button>`;
+    c.innerHTML = `
+      ${this.shellHeaderHTML(`<span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span>`)}
+      <span class="task-badge">${task.subType || task.categoryId}</span>
+      <h2 style="font-size: 1.2rem; margin-top: 0.5rem;">${task.title}</h2>
+      ${this.renderBrief(task)}
+      ${this.renderReferenceMedia(task)}
+      ${this.renderInstructions(task)}
+      <p class="font-semibold mb-2" style="font-size: 0.95rem;">Read this phrase aloud:</p>
+      <div class="moderation-item" style="text-align: center; font-style: italic; font-size: 1.05rem;">"${phrase}"</div>
+      <button class="record-btn" id="record-btn" onclick="app.toggleRecording()">⬤ Tap to Record</button>
+      <div class="text-center text-muted mb-4" style="font-size: 0.85rem;" id="record-status">Ready when you are.</div>
+      <div class="flex gap-2 mb-4" id="playback-row" style="display: none;">
+        <button class="btn-secondary" style="flex: 1;" onclick="app.previewRecording()">▶ Preview</button>
+        <button class="btn-secondary" style="flex: 1;" onclick="app.resetRecording()">↻ Re-record</button>
+      </div>
+      <button class="btn-primary" id="shell-submit" style="width: 100%;" disabled onclick="app.submitActiveTask()">Submit Recording — ${this.formatCurrency(task.reward)}</button>
+    `;
+
     this.recordState = { recording: false, recorded: false };
     this.toggleRecording = () => {
-      const btn = document.getElementById('record-btn'); const status = document.getElementById('record-status');
-      if (!this.recordState.recording) { this.recordState.recording = true; btn.classList.add('recording'); btn.textContent = '⬤ Recording...'; status.textContent = 'Speak clearly.'; this.recordState.timeout = setTimeout(() => this.stopRecording(), 10000); }
-      else this.stopRecording();
+      const btn = document.getElementById('record-btn');
+      const status = document.getElementById('record-status');
+      if (!this.recordState.recording) {
+        this.recordState.recording = true;
+        btn.classList.add('recording');
+        btn.textContent = '⬤ Recording...';
+        status.textContent = 'Speak clearly.';
+        this.recordState.timeout = setTimeout(() => this.stopRecording(), 10000);
+      } else this.stopRecording();
     };
     this.stopRecording = () => {
-      clearTimeout(this.recordState.timeout); const btn = document.getElementById('record-btn'); const status = document.getElementById('record-status');
-      this.recordState.recording = false; this.recordState.recorded = true; btn.classList.remove('recording'); btn.textContent = '✓ Recorded'; status.textContent = 'Recording captured.'; document.getElementById('playback-row').style.display = 'flex'; document.getElementById('shell-submit').disabled = false;
+      clearTimeout(this.recordState.timeout);
+      const btn = document.getElementById('record-btn');
+      const status = document.getElementById('record-status');
+      this.recordState.recording = false;
+      this.recordState.recorded = true;
+      btn.classList.remove('recording');
+      btn.textContent = '✓ Recorded';
+      status.textContent = 'Recording captured.';
+      document.getElementById('playback-row').style.display = 'flex';
+      document.getElementById('shell-submit').disabled = false;
     };
-    this.previewRecording = () => { document.getElementById('record-status').textContent = '▶ Playing back...'; setTimeout(() => document.getElementById('record-status').textContent = 'Preview complete.', 1800); };
-    this.resetRecording = () => { this.recordState.recorded = false; const btn = document.getElementById('record-btn'); btn.textContent = '⬤ Tap to Record'; btn.classList.remove('recording'); document.getElementById('record-status').textContent = 'Ready when you are.'; document.getElementById('playback-row').style.display = 'none'; document.getElementById('shell-submit').disabled = true; };
+    this.previewRecording = () => {
+      document.getElementById('record-status').textContent = '▶ Playing back...';
+      setTimeout(() => document.getElementById('record-status').textContent = 'Preview complete.', 1800);
+    };
+    this.resetRecording = () => {
+      this.recordState.recorded = false;
+      const btn = document.getElementById('record-btn');
+      btn.textContent = '⬤ Tap to Record';
+      btn.classList.remove('recording');
+      document.getElementById('record-status').textContent = 'Ready when you are.';
+      document.getElementById('playback-row').style.display = 'none';
+      document.getElementById('shell-submit').disabled = true;
+    };
   }
 
   renderShellReferral(task) {
     const c = document.getElementById('active-task-container');
     const code = (this.userDoc && this.userDoc.referralCode) || 'EARNWAVE-DEMO1';
     const shareText = encodeURIComponent(`Join EarnWave: Use my code ${code}`);
-    c.innerHTML = `${this.shellHeaderHTML(`<span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span>`)}<span class="task-badge">${task.subType || task.categoryId}</span><h2 style="font-size: 1.2rem; margin-top: 0.5rem;">${task.title}</h2>${this.renderBrief(task)}${this.renderInstructions(task)}<p class="text-muted mb-2" style="font-size: 0.85rem;">Your referral code</p><div class="ref-code">${code}</div><div class="flex gap-2 mb-4"><button class="btn-secondary" style="flex: 1;" onclick="app.copyRefCode('${code}')">📋 Copy</button><button class="btn-secondary" style="flex: 1;" onclick="window.open('https://wa.me/?text=${shareText}', '_blank')">📤 WhatsApp</button></div><label class="text-muted mb-2" style="display:block; font-size: 0.85rem;">Paste the username you invited</label><input type="text" id="ref-input" placeholder="@username" oninput="app.refInput(this)"><button class="btn-primary" id="shell-submit" style="width: 100%;" disabled onclick="app.submitActiveTask()">Verify & Claim ${this.formatCurrency(task.reward)}</button>`;
-    this.copyRefCode = (code) => { if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => this.showToast('Code copied!', 'success')); else this.showToast('Copy: ' + code, 'info'); };
-    this.refInput = (el) => { this.taskState.answers.text = el.value; document.getElementById('shell-submit').disabled = el.value.trim().length < 3; };
+    c.innerHTML = `
+      ${this.shellHeaderHTML(`<span class="font-semibold text-success">+${this.formatCurrency(task.reward)}</span>`)}
+      <span class="task-badge">${task.subType || task.categoryId}</span>
+      <h2 style="font-size: 1.2rem; margin-top: 0.5rem;">${task.title}</h2>
+      ${this.renderBrief(task)}
+      ${this.renderInstructions(task)}
+      <p class="text-muted mb-2" style="font-size: 0.85rem;">Your referral code</p>
+      <div class="ref-code">${code}</div>
+      <div class="flex gap-2 mb-4">
+        <button class="btn-secondary" style="flex: 1;" onclick="app.copyRefCode('${code}')">📋 Copy</button>
+        <button class="btn-secondary" style="flex: 1;" onclick="window.open('https://wa.me/?text=${shareText}', '_blank')">📤 WhatsApp</button>
+      </div>
+      <label class="text-muted mb-2" style="display:block; font-size: 0.85rem;">Paste the username you invited</label>
+      <input type="text" id="ref-input" placeholder="@username" oninput="app.refInput(this)">
+      <button class="btn-primary" id="shell-submit" style="width: 100%;" disabled onclick="app.submitActiveTask()">Verify & Claim ${this.formatCurrency(task.reward)}</button>
+    `;
+    this.copyRefCode = (code) => {
+      if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => this.showToast('Code copied!', 'success'));
+      else this.showToast('Copy: ' + code, 'info');
+    };
+    this.refInput = (el) => {
+      this.taskState.answers.text = el.value;
+      document.getElementById('shell-submit').disabled = el.value.trim().length < 3;
+    };
   }
 
   async submitActiveTask() {
     if (!this.activeTask) return;
     const task = this.activeTask;
     const submitBtn = document.getElementById('shell-submit');
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<div class="loader"></div> Verifying...'; }
+
+    if (task.flow === 'RATING' && !this.taskState.answers.stars) return this.showToast('Select stars.', 'error');
+    if (task.flow === 'REDIRECT') {
+      const url = document.getElementById('proof-url');
+      if (!url || !url.value) return this.showToast('Paste your proof link.', 'error');
+    }
+    if (task.flow === 'REFERRAL') {
+      const v = document.getElementById('ref-input');
+      if (!v || !v.value) return this.showToast('Enter the username.', 'error');
+    }
+    if (task.flow === 'TIMED' && this.taskState.timerId) clearInterval(this.taskState.timerId);
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<div class="loader"></div> Verifying...';
+    }
     try {
-      const result = await this.apiFetch('/api/task/submit', { method: 'POST', body: JSON.stringify({ taskId: task.id, submission: this.taskState.answers }) });
+      const result = await this.apiFetch('/api/task/submit', {
+        method: 'POST',
+        body: JSON.stringify({ taskId: task.id, submission: this.taskState.answers }),
+      });
       this.userDoc.balance = (this.userDoc.balance || 0) + result.reward;
       this.userDoc.lifetimeEarnings = (this.userDoc.lifetimeEarnings || 0) + result.reward;
       task.status = 'CLOSED';
@@ -1053,18 +1459,28 @@ class EarnWaveApp {
     const amount = parseFloat(document.getElementById('withdraw-amount').value);
     const btn = document.getElementById('withdraw-btn');
     if (isNaN(amount) || amount < 100) return this.showToast('Minimum KES 100.', 'error');
-    btn.disabled = true; btn.innerHTML = '<div class="loader"></div> Processing...';
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader"></div> Processing...';
     try {
       await this.apiFetch('/api/withdraw', { method: 'POST', body: JSON.stringify({ amount }) });
       this.userDoc.balance -= (amount + 20);
       this.showToast(`Withdrawal of ${this.formatCurrency(amount)} sent!`, 'success');
       document.getElementById('withdraw-amount').value = '';
-      this.updateWalletUI(); this.renderTransactions(false);
-    } catch (err) { this.showToast('Withdrawal failed: ' + err.message, 'error'); }
-    finally { btn.disabled = false; btn.innerHTML = 'Request Withdrawal'; }
+      this.updateWalletUI();
+      this.renderTransactions(false);
+    } catch (err) {
+      this.showToast('Withdrawal failed: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Request Withdrawal';
+    }
   }
 
-  resetData() { if (!confirm('Sign out and clear local data?')) return; this.logout(); }
+  resetData() {
+    if (!confirm('Sign out and clear local data?')) return;
+    this.logout();
+  }
 }
 
 let app;
