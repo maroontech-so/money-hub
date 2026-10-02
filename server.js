@@ -1,9 +1,13 @@
 /**
  * EarnWave Backend Server
  * -----------------------
- * - Firebase Admin SDK for user verification & Firestore
- * - PayHero STK Push for M-Pesa payments
- * - Express REST API
+ * Firebase Admin SDK + PayHero STK Push
+ * 
+ * Environment variables required:
+ *   FIREBASE_SERVICE_ACCOUNT_JSON  — service account JSON as a single string
+ *   PAYHERO_USERNAME               — PayHero API username
+ *   PAYHERO_PASSWORD               — PayHero API password
+ *   PAYHERO_CHANNEL_ID             — PayHero channel/account ID
  */
 
 require('dotenv').config();
@@ -14,7 +18,6 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const axios = require('axios');
 const path = require('path');
-const fs = require('fs');
 const admin = require('firebase-admin');
 
 const app = express();
@@ -25,15 +28,11 @@ const PORT = process.env.PORT || 3000;
 ============================================================ */
 let db;
 try {
-  let serviceAccount;
+  let serviceAccount = null;
 
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-  } else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-    const p = path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
-    if (fs.existsSync(p)) {
-      serviceAccount = JSON.parse(fs.readFileSync(p, 'utf8'));
-    }
+    console.log('[Firebase] Loaded service account from environment variable.');
   }
 
   if (serviceAccount) {
@@ -41,62 +40,15 @@ try {
       credential: admin.credential.cert(serviceAccount),
     });
     db = admin.firestore();
-    console.log('[Firebase] Admin SDK initialized.');
+    console.log('[Firebase] Admin SDK initialized successfully.');
   } else {
-    console.warn('[Firebase] No service account found. Running in MOCK mode.');
-    db = createMockFirestore();
+    console.error('[Firebase] CRITICAL: FIREBASE_SERVICE_ACCOUNT_JSON is not set.');
+    console.error('[Firebase] Set it in your environment (Render / Railway / VPS).');
+    process.exit(1);
   }
 } catch (err) {
   console.error('[Firebase] Init failed:', err.message);
-  console.warn('[Firebase] Falling back to MOCK Firestore.');
-  db = createMockFirestore();
-}
-
-/* ============================================================
-   MOCK FIRESTORE (dev fallback when no credentials)
-============================================================ */
-function createMockFirestore() {
-  const store = new Map();
-  return {
-    collection: (name) => ({
-      doc: (id) => ({
-        async get() {
-          const key = `${name}/${id}`;
-          const data = store.get(key);
-          return { exists: !!data, data: () => data, id };
-        },
-        async set(data, opts = {}) {
-          const key = `${name}/${id}`;
-          const existing = store.get(key) || {};
-          store.set(key, opts.merge ? { ...existing, ...data } : data);
-          return true;
-        },
-        async update(data) {
-          const key = `${name}/${id}`;
-          const existing = store.get(key) || {};
-          store.set(key, { ...existing, ...data });
-          return true;
-        },
-        async delete() {
-          store.delete(`${name}/${id}`);
-          return true;
-        },
-      }),
-      where: (field, op, value) => ({
-        limit: () => ({
-          async get() {
-            const results = [];
-            for (const [key, val] of store.entries()) {
-              if (key.startsWith(name + '/') && val[field] === value) {
-                results.push({ id: key.split('/')[1], data: () => val });
-              }
-            }
-            return { empty: results.length === 0, docs: results, forEach: (cb) => results.forEach(cb) };
-          },
-        }),
-      }),
-    }),
-  };
+  process.exit(1);
 }
 
 /* ============================================================
@@ -109,8 +61,33 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.static(__dirname));
 
 /* ============================================================
+   PAYHERO CLIENT
+============================================================ */
+const PAYHERO_USERNAME = process.env.PAYHERO_USERNAME;
+const PAYHERO_PASSWORD = process.env.PAYHERO_PASSWORD;
+const PAYHERO_CHANNEL_ID = process.env.PAYHERO_CHANNEL_ID;
+
+if (!PAYHERO_USERNAME || !PAYHERO_PASSWORD || !PAYHERO_CHANNEL_ID) {
+  console.warn('[PayHero] Missing credentials. STK push will fail.');
+}
+
+const payheroBasicToken = Buffer.from(
+  `${PAYHERO_USERNAME}:${PAYHERO_PASSWORD}`
+).toString('base64');
+
+const payhero = axios.create({
+  baseURL: process.env.PAYHERO_API_BASE || 'https://backend.payhero.co.ke/api/v2',
+  headers: {
+    'Authorization': `Basic ${payheroBasicToken}`,
+    'Content-Type': 'application/json',
+  },
+  timeout: 20000,
+});
+
+/* ============================================================
    LOAD TASKS
 ============================================================ */
+const fs = require('fs');
 const TASKS_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'tasks.json'), 'utf8'));
 const CATEGORIES = TASKS_DATA.categories;
 const TASKS = TASKS_DATA.tasks;
@@ -121,7 +98,7 @@ function unlockFeeFor(task) {
 }
 
 /* ============================================================
-   AUTH MIDDLEWARE — verify Firebase ID token
+   AUTH MIDDLEWARE
 ============================================================ */
 async function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization || '';
@@ -142,41 +119,19 @@ async function requireAuth(req, res, next) {
 }
 
 /* ============================================================
-   PAYHERO CLIENT
-============================================================ */
-const payhero = axios.create({
-  baseURL: process.env.PAYHERO_API_BASE || 'https://backend.payhero.co.ke/api/v2',
-  headers: {
-    'Authorization': process.env.PAYHERO_AUTH_TOKEN,
-    'Content-Type': 'application/json',
-  },
-  timeout: 20000,
-});
-
-/* ============================================================
    ROUTES — PUBLIC
 ============================================================ */
-
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'EarnWave', time: new Date().toISOString() });
 });
 
-// Serve tasks list
 app.get('/api/tasks', (req, res) => {
-  res.json({
-    categories: CATEGORIES,
-    tasks: TASKS,
-  });
+  res.json({ categories: CATEGORIES, tasks: TASKS });
 });
 
 /* ============================================================
-   ROUTES — AUTHENTICATED
+   ROUTES — USER
 ============================================================ */
-
-/**
- * POST /api/user/bootstrap
- * Create or fetch the user's Firestore doc on first login.
- */
 app.post('/api/user/bootstrap', requireAuth, async (req, res) => {
   try {
     const uid = req.user.uid;
@@ -192,7 +147,7 @@ app.post('/api/user/bootstrap', requireAuth, async (req, res) => {
         username: username || (req.user.email ? req.user.email.split('@')[0] : 'user'),
         phone: phone || null,
         referralCode: 'EARNWAVE-' + Math.random().toString(36).substring(2, 7).toUpperCase(),
-        status: 'PENDING',           // PENDING → ACTIVE after KES 100 activation
+        status: 'PENDING',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         balance: 0,
         lifetimeEarnings: 0,
@@ -215,10 +170,6 @@ app.post('/api/user/bootstrap', requireAuth, async (req, res) => {
   }
 });
 
-/**
- * GET /api/user/me
- * Fetch current user doc + wallet.
- */
 app.get('/api/user/me', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('users').doc(req.user.uid).get();
@@ -229,9 +180,6 @@ app.get('/api/user/me', requireAuth, async (req, res) => {
   }
 });
 
-/**
- * GET /api/user/transactions
- */
 app.get('/api/user/transactions', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('users').doc(req.user.uid)
@@ -244,15 +192,13 @@ app.get('/api/user/transactions', requireAuth, async (req, res) => {
     snap.forEach(doc => txs.push({ id: doc.id, ...doc.data() }));
     res.json({ transactions: txs });
   } catch (err) {
-    // Fallback if orderBy fails on mock
     res.json({ transactions: [] });
   }
 });
 
-/**
- * POST /api/payment/activation
- * Initiate KES 100 STK push for account activation.
- */
+/* ============================================================
+   PAYMENT — ACTIVATION (KES 100)
+============================================================ */
 app.post('/api/payment/activation', requireAuth, async (req, res) => {
   try {
     const uid = req.user.uid;
@@ -270,16 +216,14 @@ app.post('/api/payment/activation', requireAuth, async (req, res) => {
     const amount = Number(process.env.ACCOUNT_ACTIVATION_FEE_KES || 100);
     const reference = `ACT-${uid.slice(0, 8)}-${Date.now()}`;
 
-    // Call PayHero STK Push
     const response = await payhero.post('/payments/initiate-stk-push', {
       amount,
       phone_number: normalizePhone(phone),
-      channel_id: process.env.PAYHERO_CHANNEL_ID,
+      channel_id: PAYHERO_CHANNEL_ID,
       provider: 'm-pesa',
       external_reference: reference,
     });
 
-    // Record pending payment
     await db.collection('payments').doc(reference).set({
       uid,
       type: 'ACTIVATION',
@@ -307,10 +251,9 @@ app.post('/api/payment/activation', requireAuth, async (req, res) => {
   }
 });
 
-/**
- * POST /api/payment/unlock
- * Unlock a task for the given fee.
- */
+/* ============================================================
+   PAYMENT — UNLOCK TASK
+============================================================ */
 app.post('/api/payment/unlock', requireAuth, async (req, res) => {
   try {
     const uid = req.user.uid;
@@ -337,12 +280,10 @@ app.post('/api/payment/unlock', requireAuth, async (req, res) => {
       });
     }
 
-    // Deduct fee
     await userRef.update({
       balance: admin.firestore.FieldValue.increment(-fee),
     });
 
-    // Record unlock
     await userRef.collection('transactions').add({
       type: `Unlock: ${task.title}`,
       amount: fee,
@@ -351,7 +292,6 @@ app.post('/api/payment/unlock', requireAuth, async (req, res) => {
       date: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // Record unlocked task
     await userRef.collection('unlockedTasks').doc(taskId).set({
       taskId,
       fee,
@@ -366,10 +306,9 @@ app.post('/api/payment/unlock', requireAuth, async (req, res) => {
   }
 });
 
-/**
- * POST /api/task/submit
- * Submit completed task and credit reward.
- */
+/* ============================================================
+   TASK SUBMIT
+============================================================ */
 app.post('/api/task/submit', requireAuth, async (req, res) => {
   try {
     const uid = req.user.uid;
@@ -380,7 +319,6 @@ app.post('/api/task/submit', requireAuth, async (req, res) => {
 
     const userRef = db.collection('users').doc(uid);
 
-    // Credit reward
     await userRef.update({
       balance: admin.firestore.FieldValue.increment(task.reward),
       lifetimeEarnings: admin.firestore.FieldValue.increment(task.reward),
@@ -394,7 +332,6 @@ app.post('/api/task/submit', requireAuth, async (req, res) => {
       date: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // Mark task closed
     await userRef.collection('unlockedTasks').doc(taskId).update({
       status: 'CLOSED',
       submission: submission || null,
@@ -408,10 +345,9 @@ app.post('/api/task/submit', requireAuth, async (req, res) => {
   }
 });
 
-/**
- * POST /api/withdraw
- * Request M-Pesa withdrawal.
- */
+/* ============================================================
+   WITHDRAW
+============================================================ */
 app.post('/api/withdraw', requireAuth, async (req, res) => {
   try {
     const uid = req.user.uid;
@@ -451,9 +387,6 @@ app.post('/api/withdraw', requireAuth, async (req, res) => {
       date: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // TODO: Call PayHero Wallet Withdraw endpoint here
-    // await payhero.post('/payments/wallet-withdraw', { amount, phone_number: user.phone, ... });
-
     res.json({ success: true, amount, networkFee });
   } catch (err) {
     console.error('[withdraw]', err);
@@ -462,7 +395,7 @@ app.post('/api/withdraw', requireAuth, async (req, res) => {
 });
 
 /* ============================================================
-   PAYHERO CALLBACK — public endpoint
+   PAYHERO CALLBACK
 ============================================================ */
 app.post('/api/payhero/callback', async (req, res) => {
   try {
@@ -536,13 +469,9 @@ app.listen(PORT, () => {
   console.log('  ███████╗██║  ██║██║  ██║██║ ╚████║╚███╔███╔╝██║  ██║ ╚████╔╝ ███████╗');
   console.log('  ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══╝╚══╝ ╚═╝  ╚═╝  ╚═══╝  ╚══════╝');
   console.log('');
-  console.log(`  Server running on http://localhost:${PORT}`);
+  console.log(`  Server running on port ${PORT}`);
   console.log(`  Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log('');
-  console.log('  Setup checklist:');
-  console.log('   [ ] Firebase serviceAccountKey.json in project root');
-  console.log('   [ ] PayHero credentials in .env');
-  console.log('   [ ] PayHero callback URL set to ' + (process.env.PUBLIC_BASE_URL || 'your-domain') + '/api/payhero/callback');
+  console.log(`  PayHero Channel: ${PAYHERO_CHANNEL_ID || 'NOT SET'}`);
   console.log('');
 });
 
