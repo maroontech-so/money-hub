@@ -1,6 +1,12 @@
 /**
  * EarnWave Backend Server
  * Firebase Admin SDK + PayHero STK Push
+ *
+ * Environment variables required:
+ *   FIREBASE_SERVICE_ACCOUNT_BASE64  — base64-encoded service account JSON
+ *   PAYHERO_USERNAME                 — PayHero API username
+ *   PAYHERO_PASSWORD                 — PayHero API password
+ *   PAYHERO_CHANNEL_ID               — PayHero channel/account ID
  */
 
 require('dotenv').config();
@@ -18,20 +24,29 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 /* ============================================================
-   FIREBASE ADMIN INIT
+   FIREBASE ADMIN INIT (BASE64 — survives Render env var handling)
 ============================================================ */
 let db;
 
 try {
   let serviceAccount = null;
 
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+  // Preferred: base64-encoded JSON (no newline corruption on Render)
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    const json = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
+    serviceAccount = JSON.parse(json);
+    console.log('[Firebase] Loaded from FIREBASE_SERVICE_ACCOUNT_BASE64');
+  }
+
+  // Fallback: raw JSON env var (works locally, risky on Render)
+  if (!serviceAccount && process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    console.log('[Firebase] Loaded credentials from FIREBASE_SERVICE_ACCOUNT_JSON');
+    console.log('[Firebase] Loaded from FIREBASE_SERVICE_ACCOUNT_JSON');
   }
 
   if (!serviceAccount) {
-    console.error('[Firebase] CRITICAL: FIREBASE_SERVICE_ACCOUNT_JSON is not set.');
+    console.error('[Firebase] CRITICAL: No service account configured.');
+    console.error('[Firebase] Set FIREBASE_SERVICE_ACCOUNT_BASE64 in Render environment variables.');
     process.exit(1);
   }
 
@@ -42,6 +57,7 @@ try {
   console.log('[Firebase] Admin SDK initialized. Project:', serviceAccount.project_id);
 } catch (err) {
   console.error('[Firebase] Initialization failed:', err.message);
+  console.error('[Firebase] Stack:', err.stack);
   process.exit(1);
 }
 
@@ -55,7 +71,9 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.static(__dirname));
 
 /* ============================================================
-   PAYHERO CLIENT
+   PAYHERO CLIENT — CORRECT ENDPOINT
+   Endpoint: https://backend.payhero.co.ke/api/v2/payments/initiate-stk-push
+   Auth: Basic base64(username:password)
 ============================================================ */
 const PAYHERO_USERNAME = process.env.PAYHERO_USERNAME;
 const PAYHERO_PASSWORD = process.env.PAYHERO_PASSWORD;
@@ -70,18 +88,30 @@ const payheroBasicToken = Buffer.from(
 ).toString('base64');
 
 const payhero = axios.create({
-  baseURL: process.env.PAYHERO_API_BASE || 'https://backend.payhero.co.ke/api/v2',
+  baseURL: 'https://backend.payhero.co.ke/api/v2',
   headers: {
     'Authorization': `Basic ${payheroBasicToken}`,
     'Content-Type': 'application/json',
   },
-  timeout: 20000,
+  timeout: 25000,
 });
 
 /* ============================================================
    LOAD TASKS
 ============================================================ */
-const TASKS_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'tasks.json'), 'utf8'));
+let TASKS_DATA;
+try {
+  const tasksPath = path.join(__dirname, 'tasks.json');
+  if (!fs.existsSync(tasksPath)) {
+    console.error('[Tasks] tasks.json not found at:', tasksPath);
+    process.exit(1);
+  }
+  TASKS_DATA = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
+} catch (err) {
+  console.error('[Tasks] Failed to load tasks.json:', err.message);
+  process.exit(1);
+}
+
 const CATEGORIES = TASKS_DATA.categories;
 const TASKS = TASKS_DATA.tasks;
 
@@ -132,7 +162,13 @@ async function requireAuth(req, res, next) {
    PUBLIC ROUTES
 ============================================================ */
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'EarnWave', time: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    service: 'EarnWave',
+    firebase: db ? 'connected' : 'not initialized',
+    payhero_configured: !!(PAYHERO_USERNAME && PAYHERO_PASSWORD && PAYHERO_CHANNEL_ID),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 app.get('/api/tasks', (req, res) => {
@@ -145,9 +181,6 @@ app.get('/api/payhero/test', (req, res) => {
     username_set: !!PAYHERO_USERNAME,
     password_set: !!PAYHERO_PASSWORD,
     channel_id: PAYHERO_CHANNEL_ID || null,
-    auth_token_preview: payheroBasicToken
-      ? `${payheroBasicToken.slice(0, 12)}...`
-      : null,
   });
 });
 
@@ -189,7 +222,6 @@ app.post('/api/user/bootstrap', requireAuth, async (req, res) => {
       return res.json({ created: true, user: newUser });
     }
 
-    // If existing user, and phone passed in but missing on doc, backfill it
     const existing = snap.data();
     if (phone && !existing.phone) {
       await userRef.update({ phone: normalizePhone(phone) });
@@ -272,6 +304,7 @@ app.post('/api/payment/activation', requireAuth, async (req, res) => {
     const amount = Number(process.env.ACCOUNT_ACTIVATION_FEE_KES || 100);
     const reference = `ACT-${uid.slice(0, 8)}-${Date.now()}`;
 
+    // CORRECT PayHero endpoint per official docs
     const response = await payhero.post('/payments/initiate-stk-push', {
       amount,
       phone_number: normalizedPhone,
@@ -299,10 +332,16 @@ app.post('/api/payment/activation', requireAuth, async (req, res) => {
       payhero: response.data,
     });
   } catch (err) {
-    console.error('[activation payment]', err.response?.data || err.message);
+    console.error('[activation payment] FULL ERROR:', {
+      message: err.message,
+      code: err.code,
+      response: err.response?.data,
+    });
+
     res.status(500).json({
       error: 'Payment initiation failed',
       details: err.response?.data || err.message,
+      code: err.code || null,
     });
   }
 });
@@ -569,14 +608,6 @@ app.post('/api/payhero/callback', async (req, res) => {
     console.error('[PayHero Callback] Error:', err);
     res.status(500).json({ error: 'Callback processing failed' });
   }
-});
-
-app.post('/api/payhero/callback-test', async (req, res) => {
-  if (process.env.NODE_ENV === 'production') {
-    return res.status(403).json({ error: 'Not available in production' });
-  }
-  req.url = '/api/payhero/callback';
-  app._router.handle(req, res);
 });
 
 /* ============================================================
