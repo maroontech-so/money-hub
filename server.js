@@ -1,12 +1,6 @@
 /**
  * EarnWave Backend Server
- * Firebase Admin SDK + PayHero STK Push
- *
- * Environment variables required:
- *   FIREBASE_SERVICE_ACCOUNT_BASE64  — base64-encoded service account JSON
- *   PAYHERO_USERNAME                 — PayHero API username
- *   PAYHERO_PASSWORD                 — PayHero API password
- *   PAYHERO_CHANNEL_ID               — PayHero channel/account ID
+ * Firebase Admin SDK + PayHero SPS STK Push
  */
 
 require('dotenv').config();
@@ -24,21 +18,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 /* ============================================================
-   FIREBASE ADMIN INIT (BASE64 — survives Render env var handling)
+   FIREBASE ADMIN INIT (BASE64)
 ============================================================ */
 let db;
 
 try {
   let serviceAccount = null;
 
-  // Preferred: base64-encoded JSON (no newline corruption on Render)
   if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
     const json = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
     serviceAccount = JSON.parse(json);
     console.log('[Firebase] Loaded from FIREBASE_SERVICE_ACCOUNT_BASE64');
   }
 
-  // Fallback: raw JSON env var (works locally, risky on Render)
   if (!serviceAccount && process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
     console.log('[Firebase] Loaded from FIREBASE_SERVICE_ACCOUNT_JSON');
@@ -46,7 +38,6 @@ try {
 
   if (!serviceAccount) {
     console.error('[Firebase] CRITICAL: No service account configured.');
-    console.error('[Firebase] Set FIREBASE_SERVICE_ACCOUNT_BASE64 in Render environment variables.');
     process.exit(1);
   }
 
@@ -57,7 +48,6 @@ try {
   console.log('[Firebase] Admin SDK initialized. Project:', serviceAccount.project_id);
 } catch (err) {
   console.error('[Firebase] Initialization failed:', err.message);
-  console.error('[Firebase] Stack:', err.stack);
   process.exit(1);
 }
 
@@ -71,29 +61,23 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.static(__dirname));
 
 /* ============================================================
-   PAYHERO CLIENT — CORRECT ENDPOINT
-   Endpoint: https://backend.payhero.co.ke/api/v2/payments/initiate-stk-push
-   Auth: Basic base64(username:password)
+   PAYHERO CLIENT — SPS ENDPOINT (CORRECT)
+   Endpoint: https://payherokenya.com/sps/portal/app/stk.php
+   Auth: api_key + username in request body
 ============================================================ */
 const PAYHERO_USERNAME = process.env.PAYHERO_USERNAME;
 const PAYHERO_PASSWORD = process.env.PAYHERO_PASSWORD;
-const PAYHERO_CHANNEL_ID = process.env.PAYHERO_CHANNEL_ID;
 
-if (!PAYHERO_USERNAME || !PAYHERO_PASSWORD || !PAYHERO_CHANNEL_ID) {
+if (!PAYHERO_USERNAME || !PAYHERO_PASSWORD) {
   console.warn('[PayHero] Missing credentials. STK push will fail.');
 }
 
-const payheroBasicToken = Buffer.from(
-  `${PAYHERO_USERNAME}:${PAYHERO_PASSWORD}`
-).toString('base64');
-
 const payhero = axios.create({
-  baseURL: 'https://backend.payhero.co.ke/api/v2',
+  baseURL: 'https://payherokenya.com/sps/portal/app',
+  timeout: 25000,
   headers: {
-    'Authorization': `Basic ${payheroBasicToken}`,
     'Content-Type': 'application/json',
   },
-  timeout: 25000,
 });
 
 /* ============================================================
@@ -166,22 +150,13 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     service: 'EarnWave',
     firebase: db ? 'connected' : 'not initialized',
-    payhero_configured: !!(PAYHERO_USERNAME && PAYHERO_PASSWORD && PAYHERO_CHANNEL_ID),
+    payhero_configured: !!(PAYHERO_USERNAME && PAYHERO_PASSWORD),
     timestamp: new Date().toISOString(),
   });
 });
 
 app.get('/api/tasks', (req, res) => {
   res.json({ categories: CATEGORIES, tasks: TASKS });
-});
-
-app.get('/api/payhero/test', (req, res) => {
-  res.json({
-    configured: !!(PAYHERO_USERNAME && PAYHERO_PASSWORD && PAYHERO_CHANNEL_ID),
-    username_set: !!PAYHERO_USERNAME,
-    password_set: !!PAYHERO_PASSWORD,
-    channel_id: PAYHERO_CHANNEL_ID || null,
-  });
 });
 
 /* ============================================================
@@ -277,7 +252,7 @@ app.get('/api/user/transactions', requireAuth, async (req, res) => {
 });
 
 /* ============================================================
-   PAYMENT — ACTIVATION (KES 100)
+   PAYMENT — ACTIVATION (SPS STK PUSH)
 ============================================================ */
 app.post('/api/payment/activation', requireAuth, async (req, res) => {
   try {
@@ -304,13 +279,13 @@ app.post('/api/payment/activation', requireAuth, async (req, res) => {
     const amount = Number(process.env.ACCOUNT_ACTIVATION_FEE_KES || 100);
     const reference = `ACT-${uid.slice(0, 8)}-${Date.now()}`;
 
-    // CORRECT PayHero endpoint per official docs
-    const response = await payhero.post('/payments/initiate-stk-push', {
-      amount,
-      phone_number: normalizedPhone,
-      channel_id: PAYHERO_CHANNEL_ID,
-      provider: 'm-pesa',
-      external_reference: reference,
+    // CORRECT: SPS endpoint with credentials in body
+    const response = await payhero.post('/stk.php', {
+      api_key: PAYHERO_PASSWORD,
+      username: PAYHERO_USERNAME,
+      amount: amount,
+      phone: normalizedPhone,
+      user_reference: reference,
     });
 
     await db.collection('payments').doc(reference).set({
@@ -539,12 +514,12 @@ app.post('/api/payhero/callback', async (req, res) => {
     console.log('[PayHero Callback] Received:', JSON.stringify(req.body));
 
     const payload = req.body || {};
-    const reference = payload.external_reference || payload.reference;
-    const statusRaw = (payload.status || payload.ResultCode || '').toString().toUpperCase();
-    const mpesaCode = payload.mpesa_code || payload.MpesaReceiptNumber || null;
+    const reference = payload.external_reference || payload.reference || payload.user_reference;
+    const statusRaw = (payload.status || payload.Status || payload.ResultCode || '').toString().toUpperCase();
+    const mpesaCode = payload.mpesa_code || payload.MpesaReceiptNumber || payload.MpesaCode || null;
 
     if (!reference) {
-      console.error('[PayHero Callback] Missing external_reference');
+      console.error('[PayHero Callback] Missing reference');
       return res.status(400).json({ error: 'Missing reference' });
     }
 
@@ -624,7 +599,6 @@ app.listen(PORT, () => {
   console.log('');
   console.log(`  Server running on port ${PORT}`);
   console.log(`  Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`  PayHero Channel: ${PAYHERO_CHANNEL_ID || 'NOT SET'}`);
   console.log(`  Callback URL: ${process.env.PUBLIC_BASE_URL || 'http://localhost:' + PORT}/api/payhero/callback`);
   console.log('');
 });
