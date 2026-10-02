@@ -1,6 +1,6 @@
 /**
  * EarnWave Backend Server
- * Firebase Admin SDK + PayHero SPS STK Push
+ * Firebase Admin SDK + PayHero v2 STK Push
  */
 
 require('dotenv').config();
@@ -61,22 +61,26 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.static(__dirname));
 
 /* ============================================================
-   PAYHERO CLIENT — SPS ENDPOINT (CORRECT)
-   Endpoint: https://payherokenya.com/sps/portal/app/stk.php
-   Auth: api_key + username in request body
+   PAYHERO CLIENT — v2 API (CORRECT ENDPOINT)
+   Endpoint: https://backend.payhero.co.ke/api/v2/payments/initiate-stk-push
+   Auth: HTTP Basic Auth (username:password base64)
 ============================================================ */
 const PAYHERO_USERNAME = process.env.PAYHERO_USERNAME;
 const PAYHERO_PASSWORD = process.env.PAYHERO_PASSWORD;
+const PAYHERO_CHANNEL_ID = process.env.PAYHERO_CHANNEL_ID;
 
-if (!PAYHERO_USERNAME || !PAYHERO_PASSWORD) {
-  console.warn('[PayHero] Missing credentials. STK push will fail.');
+if (!PAYHERO_USERNAME || !PAYHERO_PASSWORD || !PAYHERO_CHANNEL_ID) {
+  console.warn('[PayHero] Missing credentials (USERNAME, PASSWORD, or CHANNEL_ID). STK push will fail.');
 }
 
+const payheroAuth = Buffer.from(`${PAYHERO_USERNAME}:${PAYHERO_PASSWORD}`).toString('base64');
+
 const payhero = axios.create({
-  baseURL: 'https://payherokenya.com/sps/portal/app',
+  baseURL: 'https://backend.payhero.co.ke/api/v2',
   timeout: 25000,
   headers: {
     'Content-Type': 'application/json',
+    'Authorization': `Basic ${payheroAuth}`,
   },
 });
 
@@ -150,7 +154,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     service: 'EarnWave',
     firebase: db ? 'connected' : 'not initialized',
-    payhero_configured: !!(PAYHERO_USERNAME && PAYHERO_PASSWORD),
+    payhero_configured: !!(PAYHERO_USERNAME && PAYHERO_PASSWORD && PAYHERO_CHANNEL_ID),
     timestamp: new Date().toISOString(),
   });
 });
@@ -252,7 +256,7 @@ app.get('/api/user/transactions', requireAuth, async (req, res) => {
 });
 
 /* ============================================================
-   PAYMENT — ACTIVATION (SPS STK PUSH)
+   PAYMENT — ACTIVATION (v2 STK PUSH)
 ============================================================ */
 app.post('/api/payment/activation', requireAuth, async (req, res) => {
   try {
@@ -279,13 +283,13 @@ app.post('/api/payment/activation', requireAuth, async (req, res) => {
     const amount = Number(process.env.ACCOUNT_ACTIVATION_FEE_KES || 100);
     const reference = `ACT-${uid.slice(0, 8)}-${Date.now()}`;
 
-    // CORRECT: SPS endpoint with credentials in body
-    const response = await payhero.post('/stk.php', {
-      api_key: PAYHERO_PASSWORD,
-      username: PAYHERO_USERNAME,
+    // CORRECT: v2 API endpoint with Basic Auth
+    const response = await payhero.post('/payments/initiate-stk-push', {
       amount: amount,
-      phone: normalizedPhone,
-      user_reference: reference,
+      phone_number: normalizedPhone,
+      channel_id: PAYHERO_CHANNEL_ID,
+      provider: 'm-pesa',
+      external_reference: reference,
     });
 
     await db.collection('payments').doc(reference).set({
@@ -505,7 +509,7 @@ app.post('/api/withdraw', requireAuth, async (req, res) => {
 });
 
 /* ============================================================
-   PAYHERO CALLBACK (WEBHOOK)
+   PAYHERO CALLBACK (WEBHOOK) — unchanged, handles both v1/v2 payloads
 ============================================================ */
 app.post('/api/payhero/callback', async (req, res) => {
   const startedAt = Date.now();
@@ -515,17 +519,18 @@ app.post('/api/payhero/callback', async (req, res) => {
 
     const payload = req.body || {};
     
-    // PayHero SPS sends data inside a "response" object
+    // PayHero may send data inside a "response" object (v1) or directly (v2)
     const inner = payload.response || payload;
     
-    // Extract reference — PayHero sends User_Reference
+    // Extract reference — v2 uses external_reference
     const reference = 
+      inner.external_reference ||
       inner.User_Reference ||
       inner.user_reference ||
       payload.external_reference ||
       payload.reference;
     
-    // Extract status — look inside response first
+    // Extract status
     const statusRaw = (
       inner.Status || 
       inner.status || 
@@ -538,6 +543,7 @@ app.post('/api/payhero/callback', async (req, res) => {
     const mpesaCode = 
       inner.MPESA_Reference || 
       inner.mpesa_code || 
+      inner.receipt ||
       payload.MpesaReceiptNumber || 
       null;
 
